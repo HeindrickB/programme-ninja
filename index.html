@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2b332f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Programme Ninja</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#2b332f;
+  --tile-a:#39433d;
+  --tile-b:#333d38;
+  --line:#8d9a92;
+  --locked-fill:#39403c;
+  --locked-stroke:#4a534d;
+  --locked-ink:#6c7772;
+  --avail-fill:#b9c2bc;
+  --avail-stroke:#e6ecE8;
+  --avail-ink:#232a26;
+  --done-fill:#4fae55;
+  --done-stroke:#8ff09a;
+  --path:#8e1f2f;
+  --path-glow:#d63b52;
+  --panel:#1e2521;
+  --panel-2:#26302b;
+  --text:#e9efeb;
+  --muted:#96a29c;
+  --accent:#7ddc86;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--text);overscroll-behavior:none;user-select:none}
+#app{position:fixed;inset:0}
+
+/* ---------- fond mosaïque ---------- */
+#mosaic{position:absolute;inset:0;z-index:0}
+
+/* ---------- carte / arbre ---------- */
+#stage{position:absolute;inset:0;z-index:1;touch-action:none;cursor:grab}
+#stage.dragging{cursor:grabbing}
+#tree{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.node{pointer-events:auto;cursor:pointer}
+.node .shape{transition:fill .25s,stroke .25s,filter .25s}
+.node .label{font-weight:600;text-anchor:middle;fill:#dfe7e2;
+  paint-order:stroke;stroke:rgba(0,0,0,.75);stroke-width:3.5px;stroke-linejoin:round;pointer-events:none}
+.node.locked .label{fill:#7e8a84}
+.node.done  .label{fill:#a8f0b0}
+.node .glyph{text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.edge{stroke:var(--line);stroke-width:3;fill:none;opacity:.55;transition:stroke .2s,opacity .2s,stroke-width .2s}
+.edge.soft{opacity:.34}
+.edge.done{stroke:#5fbf68;opacity:.85}
+.edge.hl{stroke:var(--path-glow);opacity:1;stroke-width:5;filter:drop-shadow(0 0 6px var(--path))}
+.node.hl .shape{stroke:var(--path-glow)!important;filter:drop-shadow(0 0 9px var(--path))}
+.node.pulse .shape{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+.node.done .shape{filter:drop-shadow(0 0 7px rgba(90,220,110,.55))}
+
+/* ---------- barre du haut ---------- */
+#topbar{position:absolute;z-index:5;top:calc(var(--safe-t) + 10px);left:0;right:0;
+  display:flex;align-items:center;gap:10px;padding:0 12px;pointer-events:none}
+.iconbtn{pointer-events:auto;width:44px;height:44px;border-radius:13px;border:1px solid #ffffff1f;
+  background:#1c2320d9;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  color:var(--text);font-size:19px;box-shadow:0 4px 14px #0006}
+.iconbtn:active{transform:scale(.94)}
+#chapTitle{pointer-events:none;flex:1;min-width:0}
+#chapTitle b{display:block;font-size:15px;line-height:1.2;text-shadow:0 2px 6px #000a;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chapTitle span{display:block;font-size:11.5px;color:#b9c5bf;text-shadow:0 2px 6px #000a}
+#progressWrap{position:absolute;z-index:5;left:12px;right:12px;top:calc(var(--safe-t) + 62px);
+  height:5px;border-radius:99px;background:#0006;overflow:hidden;pointer-events:none}
+#progressBar{height:100%;width:0;background:linear-gradient(90deg,#4fae55,#9df0a5);transition:width .5s}
+
+/* ---------- zoom ---------- */
+#zoomctl{position:absolute;z-index:5;right:12px;bottom:calc(var(--safe-b) + 18px);
+  display:flex;flex-direction:column;gap:8px}
+
+/* ---------- tiroir chapitres ---------- */
+#scrim{position:fixed;inset:0;z-index:8;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s}
+#scrim.open{opacity:1;pointer-events:auto}
+#drawer{position:fixed;z-index:9;top:0;bottom:0;left:0;width:min(85vw,340px);
+  background:var(--panel);border-right:1px solid #ffffff14;transform:translateX(-102%);
+  transition:transform .28s cubic-bezier(.2,.8,.3,1);display:flex;flex-direction:column;
+  padding-top:var(--safe-t);box-shadow:8px 0 30px #0008}
+#drawer.open{transform:none}
+#drawer h2{margin:16px 16px 4px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+#drawer .list{overflow:auto;flex:1;min-height:0;padding:4px 10px 20px;-webkit-overflow-scrolling:touch}
+.chapItem{display:block;width:100%;text-align:left;border:1px solid #ffffff12;background:var(--panel-2);
+  border-radius:14px;padding:12px 14px;margin:8px 0;color:var(--text)}
+.chapItem.active{border-color:#7ddc8666;background:#2d3a32}
+.chapItem .ct{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:7px}
+.chapItem .cs{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
+.chapItem .bar{height:4px;border-radius:99px;background:#0006;margin-top:9px;overflow:hidden}
+.chapItem .bar i{display:block;height:100%;background:#4fae55}
+.chapItem.lockedCh{opacity:.72}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;background:#ffffff14;color:#cfd8d3;font-weight:600}
+.badge.lock{background:#5b2a33;color:#ffc9d2}
+#drawer footer{padding:12px 14px calc(var(--safe-b) + 14px);border-top:1px solid #ffffff12;display:grid;gap:8px}
+.btn{border:1px solid #ffffff1f;background:#2b342f;color:var(--text);border-radius:12px;
+  padding:11px 13px;font-size:13.5px;font-weight:600;text-align:center}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:linear-gradient(180deg,#4fae55,#3d8f43);border-color:#7ddc8655;color:#06210b}
+.btn.danger{background:#48262c;border-color:#ff8a9a33;color:#ffc9d2}
+.btn.ghost{background:transparent}
+
+/* ---------- fiche quête ---------- */
+#sheet{position:fixed;z-index:11;left:0;right:0;bottom:0;max-height:88vh;background:var(--panel);
+  border-radius:22px 22px 0 0;border-top:1px solid #ffffff17;transform:translateY(105%);
+  transition:transform .3s cubic-bezier(.2,.8,.3,1);display:flex;flex-direction:column;box-shadow:0 -10px 40px #000a}
+#sheet.open{transform:none}
+#grab{width:44px;height:5px;border-radius:99px;background:#ffffff2e;margin:10px auto 4px;flex:none}
+#sheetBody{overflow:auto;min-height:0;padding:6px 18px calc(var(--safe-b) + 18px);-webkit-overflow-scrolling:touch}
+.qtype{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;padding:5px 10px;border-radius:99px;margin-bottom:8px}
+.qtype.square{background:#33405a;color:#bcd2ff}
+.qtype.circle{background:#4a3f2a;color:#ffd9a0}
+.qtype.gear{background:#4b2f52;color:#f0c2ff}
+#sheetBody h3{margin:0 0 6px;font-size:21px;line-height:1.22}
+#sheetBody .desc{color:#c8d2cd;font-size:14.5px;line-height:1.55;margin:0 0 14px}
+.crit{list-style:none;padding:0;margin:0 0 16px}
+.crit li{position:relative;padding:8px 10px 8px 34px;background:#ffffff08;border-radius:10px;
+  margin-bottom:6px;font-size:13.5px;line-height:1.4}
+.crit li:before{content:"✓";position:absolute;left:12px;top:8px;color:var(--accent);font-weight:800}
+.vidbox{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+  background:#111614;border:1px solid #ffffff12;margin-bottom:16px;display:flex;align-items:center;
+  justify-content:center;text-align:center;color:var(--muted);font-size:13px;padding:16px}
+.vidbox iframe,.vidbox video{width:100%;height:100%;border:0;display:block}
+.reqline{font-size:12.5px;color:#ffb3bf;background:#4a252d;border:1px solid #ff8a9a2e;
+  border-radius:12px;padding:10px 12px;margin-bottom:14px;line-height:1.45}
+.sheetActions{display:grid;gap:9px;margin-bottom:6px}
+label.f{display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px}
+input.f,textarea.f,select.f{width:100%;background:#141a17;border:1px solid #ffffff1c;color:var(--text);
+  border-radius:11px;padding:11px 12px;font-size:14px;font-family:inherit}
+textarea.f{min-height:80px;resize:vertical}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;z-index:20;left:50%;bottom:calc(var(--safe-b) + 90px);transform:translate(-50%,20px);
+  background:#0f1512ee;border:1px solid #ffffff1f;color:var(--text);padding:11px 16px;border-radius:13px;
+  font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;max-width:82vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- bandeau mode gérant ---------- */
+#adminBar{position:fixed;z-index:7;left:0;right:0;bottom:0;padding:9px 12px calc(var(--safe-b) + 9px);
+  background:#3a2b12ee;border-top:1px solid #ffcf7a3d;display:none;gap:8px;align-items:center;font-size:12.5px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch}
+#adminBar.on{display:flex}
+#adminBar .grow{flex:none;color:#ffd79a;font-weight:600;padding-right:2px}
+#adminBar button{flex:none;border:1px solid #ffcf7a44;background:#4a3717;color:#ffe3b5;border-radius:10px;
+  padding:8px 11px;font-size:12.5px;font-weight:600;white-space:nowrap}
+#adminBar button.on{background:#ffcf7a;color:#3a2b12}
+.hidden{display:none!important}
+
+/* ---------- gérant : liaison visuelle des flèches ---------- */
+.edgeHit{stroke:transparent;stroke-width:24;fill:none;pointer-events:none}
+#tree.linking .edgeHit{pointer-events:auto;cursor:pointer}
+#tree.linking .node{cursor:pointer}
+.node.linkSel .shape{stroke:#ffcf7a!important;stroke-width:6!important;filter:drop-shadow(0 0 10px #ffcf7a)}
+
+/* ---------- gérant : petits contrôles réutilisables ---------- */
+.swatchRow{display:flex;align-items:center;gap:12px;margin:9px 0;padding:2px 0}
+.swatchRow input[type=color]{width:46px;height:38px;border:0;border-radius:9px;background:none;padding:0;flex:none}
+.swatchRow span{flex:1;font-size:13.5px;color:var(--text)}
+.swatchRow small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.sectionTitle{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin:20px 0 4px;display:flex;align-items:center;gap:6px}
+.sectionTitle:first-child{margin-top:2px}
+.miniBtn{border:1px solid #ffffff22;background:#ffffff12;color:var(--text);border-radius:9px;
+  padding:7px 9px;font-size:11.5px;font-weight:600}
+.miniBtn.danger{background:#48262c;border-color:#ff8a9a33;color:#ffc9d2}
+.chapItem .adminRow{display:flex;gap:7px;margin-top:9px}
+.chapItem .adminRow button{flex:1}
+.iconPreviewRow{display:flex;align-items:center;gap:12px;margin:6px 0 2px}
+.iconPreviewRow .prev{width:52px;height:52px;border-radius:14px;background:#141a17;border:1px solid #ffffff1c;
+  display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;flex:none}
+.iconPreviewRow .prev img{width:100%;height:100%;object-fit:cover}
+.iconPreviewRow .stack{flex:1;display:grid;gap:6px}
+.hint{font-size:12px;color:var(--muted);line-height:1.5;margin:4px 0 10px}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="mosaic"></canvas>
+
+  <div id="stage">
+    <div id="tree">
+      <svg class="layer" id="svgEdges"></svg>
+      <svg class="layer" id="svgNodes"></svg>
+    </div>
+  </div>
+
+  <div id="topbar">
+    <button class="iconbtn" id="btnMenu" aria-label="Chapitres">☰</button>
+    <div id="chapTitle"><b>—</b><span>—</span></div>
+    <button class="iconbtn" id="btnFit" aria-label="Recentrer">⊹</button>
+  </div>
+  <div id="progressWrap"><div id="progressBar"></div></div>
+
+  <div id="zoomctl">
+    <button class="iconbtn" id="btnZoomIn">＋</button>
+    <button class="iconbtn" id="btnZoomOut">－</button>
+  </div>
+
+  <div id="adminBar">
+    <span class="grow">Mode gérant</span>
+    <button id="btnMove">Déplacer : off</button>
+    <button id="btnLink">🔗 Lier : off</button>
+    <button id="btnAdd">+ Quête</button>
+    <button id="btnTheme">🎨 Apparence</button>
+    <button id="btnSounds">🔊 Sons</button>
+    <button id="btnExitAdmin">Quitter</button>
+  </div>
+</div>
+
+<div id="scrim"></div>
+<aside id="drawer">
+  <h2>Programme Ninja</h2>
+  <div class="list" id="chapList"></div>
+  <footer>
+    <button class="btn" id="btnSound">🔊 Sons : activés</button>
+    <button class="btn ghost" id="btnAdminLogin">🔧 Espace gérant</button>
+    <button class="btn danger" id="btnReset">Réinitialiser ma progression</button>
+  </footer>
+</aside>
+
+<div id="sheet"><div id="grab"></div><div id="sheetBody"></div></div>
+<div id="toast"></div>
+
+<script src="programme.js"></script>
+<script>
+/* =========================================================================
+   PROGRAMME NINJA — moteur d'application
+   Tout est local (aucun serveur, aucun coût).
+   Pour passer plus tard sur un cloud : ne réécrire que l'objet Store.
+   ========================================================================= */
+"use strict";
+
+/* ---------------------------------------------------------------- STORE
+   Seul point de contact avec le stockage. Pour brancher un cloud
+   (Supabase, Firebase...) plus tard, il suffit de remplacer les 4 méthodes
+   ci-dessous par des appels réseau — le reste de l'app ne bouge pas.      */
+/* Thème et sons par défaut — 100% modifiables depuis le mode gérant.
+   Les couleurs "verrouillé"/"validé" sont communes aux 3 formes pour que
+   la progression reste lisible d'un coup d'œil ; la couleur "disponible"
+   et la bordure sont propres à chaque forme (carré / rond / engrenage). */
+const DEFAULT_THEME = {
+  square:{ fill:"#b9c2bc", border:"#e6ecE8" },
+  circle:{ fill:"#b9c2bc", border:"#e6ecE8" },
+  gear:  { fill:"#b9c2bc", border:"#e6ecE8" },
+  locked:{ fill:"#39403c", border:"#4a534d" },
+  done:  { fill:"#4fae55", border:"#8ff09a" },
+  edge:"#8d9a92", edgeOptional:"#8d9a92", edgeDone:"#5fbf68",
+  highlight:"#8e1f2f", highlightGlow:"#d63b52"
+};
+const DEFAULT_SOUND = {
+  quest:null, gear:null,               // data URI d'un son perso, ou null = synthétisé
+  ambient:null, ambientOn:false, ambientVolume:0.35
+};
+
+const Store = {
+  KEY_PROG:  "ninja.progression.v1",
+  KEY_PREF:  "ninja.prefs.v1",
+  KEY_OVER:  "ninja.programme.override.v1",
+  KEY_THEME: "ninja.theme.v1",
+  KEY_SOUND: "ninja.sound.v1",
+
+  loadProgression(){ try{ return JSON.parse(localStorage.getItem(this.KEY_PROG)) || {done:{}}; }
+                     catch(e){ return {done:{}}; } },
+  saveProgression(p){ try{ localStorage.setItem(this.KEY_PROG, JSON.stringify(p)); }catch(e){} },
+
+  loadPrefs(){ try{ return Object.assign({sound:true,pin:"1234",chapitre:"ch1"},
+                    JSON.parse(localStorage.getItem(this.KEY_PREF))||{}); }
+               catch(e){ return {sound:true,pin:"1234",chapitre:"ch1"}; } },
+  savePrefs(p){ try{ localStorage.setItem(this.KEY_PREF, JSON.stringify(p)); }catch(e){} },
+
+  /* le programme édité par le gérant écrase le fichier programme.js */
+  loadProgramme(base){
+    try{
+      const raw = localStorage.getItem(this.KEY_OVER);
+      if(raw){ const o = JSON.parse(raw); if(o && o.chapitres) return o; }
+    }catch(e){}
+    return JSON.parse(JSON.stringify(base));
+  },
+  saveProgramme(p){ try{ localStorage.setItem(this.KEY_OVER, JSON.stringify(p)); }catch(e){} },
+  resetProgramme(){ try{ localStorage.removeItem(this.KEY_OVER); }catch(e){} },
+
+  loadTheme(){ try{ return Object.assign(JSON.parse(JSON.stringify(DEFAULT_THEME)),
+                    JSON.parse(localStorage.getItem(this.KEY_THEME))||{}); }
+              catch(e){ return JSON.parse(JSON.stringify(DEFAULT_THEME)); } },
+  saveTheme(t){ try{ localStorage.setItem(this.KEY_THEME, JSON.stringify(t)); return true; }
+               catch(e){ return false; } },
+  resetTheme(){ try{ localStorage.removeItem(this.KEY_THEME); }catch(e){} },
+
+  loadSound(){ try{ return Object.assign(JSON.parse(JSON.stringify(DEFAULT_SOUND)),
+                    JSON.parse(localStorage.getItem(this.KEY_SOUND))||{}); }
+              catch(e){ return JSON.parse(JSON.stringify(DEFAULT_SOUND)); } },
+  saveSound(s){ try{ localStorage.setItem(this.KEY_SOUND, JSON.stringify(s)); return true; }
+               catch(e){ return false; } }
+};
+
+/* ---------------------------------------------------------------- ÉTAT */
+const PROG   = Store.loadProgramme(PROGRAMME);
+let   prefs  = Store.loadPrefs();
+let   prog   = Store.loadProgression();
+let   THEME  = Store.loadTheme();
+let   SOUND  = Store.loadSound();
+let   chapId = prefs.chapitre || PROG.chapitres[0].id;
+let   admin  = false;
+let   moveMode = false;
+let   linkMode = false;
+let   linkSource = null;
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* index global de toutes les quêtes, tous chapitres confondus */
+const ALL = {};
+function reindex(){
+  for(const k in ALL) delete ALL[k];
+  PROG.chapitres.forEach(ch => ch.quetes.forEach(q => { q._ch = ch.id; ALL[q.id] = q; }));
+}
+reindex();
+
+const chapter = id => PROG.chapitres.find(c => c.id === id);
+const isDone  = id => !!prog.done[id];
+
+/* Une quête est réalisable si TOUTES ses dépendances BLOQUANTES sont validées.
+   Les "liens" (flèches venant d'un rond optionnel) ne bloquent jamais. */
+function isAvailable(q){ return (q.deps||[]).every(isDone); }
+/* toutes les flèches entrantes, bloquantes ou non */
+const incoming = q => (q.deps||[]).concat(q.liens||[]);
+function stateOf(q){ return isDone(q.id) ? "done" : (isAvailable(q) ? "avail" : "locked"); }
+
+/* Un chapitre est débloqué si tous ses engrenages requis sont validés. */
+function chapUnlocked(ch){ return (ch.requis||[]).every(isDone); }
+
+/* Chemin manquant : toutes les quêtes non validées en amont d'une cible.
+   On remonte les flèches bloquantes ET les flèches optionnelles, pour que
+   l'utilisateur voie tout ce qui mène à la quête visée.                   */
+function missingPath(qid){
+  const nodes = new Set(), edges = new Set(), seen = new Set();
+  (function walk(id){
+    if(seen.has(id)) return; seen.add(id);
+    const q = ALL[id]; if(!q) return;
+    incoming(q).forEach(d => {
+      if(!isDone(d)){ nodes.add(d); edges.add(d + "→" + id); walk(d); }
+    });
+  })(qid);
+  return {nodes, edges};
+}
+
+/* --------------------------------------------------------- APPARENCE
+   Applique le thème courant : les couleurs d'état (verrouillé / validé),
+   des flèches et de la surbrillance passent par des variables CSS ; les
+   couleurs "disponible" propres à chaque forme sont appliquées nœud par
+   nœud dans paint(), puisqu'une variable CSS ne peut pas dépendre du
+   type de la quête.                                                    */
+function applyTheme(){
+  const r = document.documentElement.style;
+  r.setProperty("--locked-fill",   THEME.locked.fill);
+  r.setProperty("--locked-stroke", THEME.locked.border);
+  r.setProperty("--done-fill",     THEME.done.fill);
+  r.setProperty("--done-stroke",   THEME.done.border);
+  r.setProperty("--line",          THEME.edge);
+  r.setProperty("--path",          THEME.highlight);
+  r.setProperty("--path-glow",     THEME.highlightGlow);
+}
+/* couleur d'encre (glyphe) lisible quel que soit le fond choisi */
+function inkFor(hex){
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex||"");
+  if(!m) return "#232a26";
+  const [r,g,b] = [1,2,3].map(i => parseInt(m[i],16));
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return lum > 0.55 ? "#232a26" : "#f2f6f3";
+}
+
+/* ---------------------------------------------------------------- FOND */
+(function mosaic(){
+  const cv = $("#mosaic"), ctx = cv.getContext("2d");
+  function draw(){
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = innerWidth*dpr; cv.height = innerHeight*dpr;
+    cv.style.width = innerWidth+"px"; cv.style.height = innerHeight+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const T = 34;                        // taille d'un carreau
+    ctx.fillStyle = "#2b332f";
+    ctx.fillRect(0,0,innerWidth,innerHeight);
+    for(let y=0; y<innerHeight+T; y+=T){
+      for(let x=0; x<innerWidth+T; x+=T){
+        // variation légère et stable (pseudo-aléatoire déterministe)
+        const n = Math.sin((x*12.9898 + y*78.233)) * 43758.5453;
+        const r = n - Math.floor(n);
+        const l = 56 + Math.round(r*13);             // clarté
+        const h = 140 + Math.round((r-0.5)*22);      // teinte verte/grise
+        ctx.fillStyle = `hsl(${h} 7% ${l/4.4}%)`;
+        ctx.fillRect(x, y, T-2, T-2);
+      }
+    }
+    // léger vignettage pour faire ressortir l'arbre
+    const g = ctx.createRadialGradient(innerWidth/2, innerHeight/2, innerHeight*0.25,
+                                       innerWidth/2, innerHeight/2, innerHeight*0.95);
+    g.addColorStop(0,"#0000"); g.addColorStop(1,"#00000070");
+    ctx.fillStyle = g; ctx.fillRect(0,0,innerWidth,innerHeight);
+  }
+  draw(); addEventListener("resize", draw);
+})();
+
+/* ------------------------------------------------------- FORMES SVG */
+const NS = "http://www.w3.org/2000/svg";
+const el = (n,a) => { const e = document.createElementNS(NS,n);
+  for(const k in a) e.setAttribute(k, a[k]); return e; };
+
+const BASE = 46;                       // rayon de référence d'un nœud
+const radiusOf = q => BASE * (q.size || 1);
+
+/* engrenage : dents arrondies autour d'un disque */
+function gearPath(r, teeth){
+  teeth = teeth || 10;
+  const ri = r*0.78, ro = r, pts = [];
+  for(let i=0;i<teeth;i++){
+    const a0 = (i/teeth)*Math.PI*2, step = (Math.PI*2/teeth)/4;
+    pts.push([a0-step*0.9, ri],[a0-step*0.45, ro],[a0+step*0.45, ro],[a0+step*0.9, ri]);
+  }
+  return pts.map(([a,rr],i) =>
+    (i?"L":"M") + (Math.cos(a)*rr).toFixed(2) + "," + (Math.sin(a)*rr).toFixed(2)
+  ).join(" ") + " Z";
+}
+
+/* ------------------------------------------------------- RENDU ARBRE */
+const svgE = $("#svgEdges"), svgN = $("#svgNodes"), tree = $("#tree");
+let nodeEls = {}, edgeEls = {};
+
+function render(){
+  const ch = chapter(chapId);
+  svgE.innerHTML = ""; svgN.innerHTML = ""; nodeEls = {}; edgeEls = {};
+
+  // marqueur de flèche
+  const defs = el("defs");
+  [["ah", THEME.edge], ["aho", THEME.edgeOptional], ["ahd", THEME.edgeDone], ["ahh", THEME.highlightGlow]]
+    .forEach(([id,col]) => {
+      const m = el("marker",{id, viewBox:"0 0 10 10", refX:"9", refY:"5",
+        markerWidth:"5.5", markerHeight:"5.5", orient:"auto-start-reverse"});
+      m.appendChild(el("path",{d:"M0,0 L10,5 L0,10 z", fill:col}));
+      defs.appendChild(m);
+    });
+  svgE.appendChild(defs);
+
+  // --- flèches (bloquantes en trait plein, optionnelles en pointillés) ---
+  ch.quetes.forEach(q => incoming(q).forEach(dep => {
+    const from = ALL[dep], to = q;
+    if(!from) return;
+    // dépendance venant d'un autre chapitre : pas de trait à dessiner ici
+    if(from._ch !== ch.id) return;
+    const soft = (q.liens||[]).includes(dep);
+    const r1 = radiusOf(from), r2 = radiusOf(to);
+    const dx = to.x-from.x, dy = to.y-from.y, L = Math.hypot(dx,dy) || 1;
+    const ux = dx/L, uy = dy/L;
+    const x1=(from.x+ux*(r1+6)), y1=(from.y+uy*(r1+6)), x2=(to.x-ux*(r2+13)), y2=(to.y-uy*(r2+13));
+    const p = el("line",{
+      x1:x1.toFixed(1), y1:y1.toFixed(1), x2:x2.toFixed(1), y2:y2.toFixed(1),
+      class:"edge" + (soft ? " soft" : ""), "marker-end": soft ? "url(#aho)" : "url(#ah)"
+    });
+    if(soft){ p.setAttribute("stroke-dasharray","9 8"); p.setAttribute("stroke", THEME.edgeOptional); }
+    edgeEls[dep+"→"+q.id] = p;
+    svgE.appendChild(p);
+    // ligne invisible plus épaisse : sert de zone de clic en mode "Lier" pour supprimer la flèche
+    const hit = el("line",{x1:x1.toFixed(1), y1:y1.toFixed(1), x2:x2.toFixed(1), y2:y2.toFixed(1),
+                           class:"edgeHit"});
+    hit.dataset.from = dep; hit.dataset.to = q.id;
+    hit.addEventListener("pointerdown", ev => ev.stopPropagation());
+    hit.addEventListener("click", () => { if(admin && linkMode) removeLink(dep, q.id); });
+    svgE.appendChild(hit);
+  }));
+
+  // --- nœuds ---
+  ch.quetes.forEach(q => {
+    const r = radiusOf(q);
+    const g = el("g",{class:"node", transform:`translate(${q.x},${q.y})`, "data-id":q.id});
+
+    let shape;
+    if(q.type === "circle")      shape = el("circle",{r, class:"shape"});
+    else if(q.type === "gear")   shape = el("path",{d:gearPath(r,11), class:"shape"});
+    else                         shape = el("rect",{x:-r, y:-r, width:r*2, height:r*2,
+                                                    rx:r*0.22, class:"shape"});
+    shape.setAttribute("stroke-width", Math.max(3, r*0.075));
+    g.appendChild(shape);
+
+    if(q.iconImg){
+      // image personnalisée : recadrée à l'intérieur de la forme du nœud
+      const clipId = "clip_" + q.id;
+      const clip = el("clipPath",{id:clipId});
+      const rc = r*0.86;
+      if(q.type === "circle")      clip.appendChild(el("circle",{r:rc}));
+      else if(q.type === "gear")   clip.appendChild(el("circle",{r:rc*0.92}));
+      else                         clip.appendChild(el("rect",{x:-rc,y:-rc,width:rc*2,height:rc*2,rx:rc*0.22}));
+      defs.appendChild(clip);
+      const img = el("image",{x:-rc, y:-rc, width:rc*2, height:rc*2,
+                              "clip-path":`url(#${clipId})`, "preserveAspectRatio":"xMidYMid slice"});
+      img.setAttributeNS("http://www.w3.org/1999/xlink","href", q.iconImg);
+      img.setAttribute("href", q.iconImg);
+      g.appendChild(img);
+    } else {
+      const glyph = el("text",{class:"glyph", y: q.type==="gear" ? 1 : 0,
+                               "font-size": (r*0.85).toFixed(0)});
+      glyph.textContent = q.icon || "•";
+      g.appendChild(glyph);
+    }
+
+    // libellé (retour à la ligne automatique)
+    const words = (q.titre||"").split(" ");
+    const lines = []; let cur = "";
+    const maxChars = Math.max(12, Math.round(r/4.2));
+    words.forEach(w => {
+      if((cur+" "+w).trim().length > maxChars){ lines.push(cur.trim()); cur = w; }
+      else cur += " " + w;
+    });
+    if(cur.trim()) lines.push(cur.trim());
+    const fs = Math.max(12, Math.min(18, r*0.29));   // libellé proportionnel au nœud
+    lines.slice(0,3).forEach((ln,i) => {
+      const t = el("text",{class:"label", y: r + fs + 6 + i*(fs+3), "font-size": fs.toFixed(1)});
+      t.textContent = ln; g.appendChild(t);
+    });
+
+    svgN.appendChild(g);
+    nodeEls[q.id] = g;
+  });
+
+  // dimensionne les deux calques sur l'étendue réelle de l'arbre
+  // (sinon un SVG sans taille rogne le contenu sur certains navigateurs mobiles)
+  const bb = bounds();
+  [svgE, svgN].forEach(s => {
+    s.setAttribute("width",  bb.w);
+    s.setAttribute("height", bb.h);
+    s.setAttribute("viewBox", `${bb.x} ${bb.y} ${bb.w} ${bb.h}`);
+    s.style.left = bb.x + "px";
+    s.style.top  = bb.y + "px";
+  });
+
+  paint();
+  updateChrome();
+}
+
+/* couleurs selon l'état (et selon la forme pour l'état "disponible") */
+function paint(){
+  const ch = chapter(chapId);
+  ch.quetes.forEach(q => {
+    const g = nodeEls[q.id]; if(!g) return;
+    const st = stateOf(q);
+    g.classList.remove("locked","avail","done"); g.classList.add(st);
+    const s = g.querySelector(".shape");
+    let fill, stroke;
+    if(st === "done"){       fill = THEME.done.fill;   stroke = THEME.done.border; }
+    else if(st === "avail"){ const tc = THEME[q.type] || THEME.square; fill = tc.fill; stroke = tc.border; }
+    else {                   fill = THEME.locked.fill; stroke = THEME.locked.border; }
+    s.setAttribute("fill", fill); s.setAttribute("stroke", stroke);
+    const gl = g.querySelector(".glyph");
+    if(gl){
+      gl.setAttribute("fill", st==="locked" ? inkFor(fill) : inkFor(fill));
+      gl.setAttribute("opacity", st==="locked" ? ".5" : "1");
+    }
+  });
+  for(const k in edgeEls){
+    const dep = k.split("→")[0], to = k.split("→")[1];
+    const soft = ALL[to] && (ALL[to].liens||[]).includes(dep);
+    edgeEls[k].classList.toggle("done", isDone(dep));
+    if(isDone(dep)) edgeEls[k].setAttribute("marker-end","url(#ahd)");
+    else edgeEls[k].setAttribute("marker-end", soft ? "url(#aho)" : "url(#ah)");
+  }
+  updateProgress();
+}
+
+function updateProgress(){
+  const ch = chapter(chapId);
+  const tot = ch.quetes.length || 1;
+  const n = ch.quetes.filter(q => isDone(q.id)).length;
+  $("#progressBar").style.width = (n/tot*100) + "%";
+}
+
+function updateChrome(){
+  const ch = chapter(chapId);
+  $("#chapTitle b").textContent = (ch.numero ? "Chapitre " + ch.numero + " — " : "") + ch.titre;
+  $("#chapTitle span").textContent = ch.sousTitre || "";
+}
+/* ------------------------------------------------------- PAN / ZOOM */
+const view = {x:0, y:0, k:1};
+function applyView(){
+  tree.style.transform = `translate(${view.x}px,${view.y}px) scale(${view.k})`;
+}
+function bounds(){
+  const ch = chapter(chapId);
+  let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+  ch.quetes.forEach(q => { const r = radiusOf(q) + 40;
+    a = Math.min(a, q.x-r); b = Math.min(b, q.y-r);
+    c = Math.max(c, q.x+r); d = Math.max(d, q.y+r+62); });   // +62 : place pour le libellé
+  if(!isFinite(a)) return {x:0,y:0,w:100,h:100};
+  return {x:a, y:b, w:c-a, h:d-b};
+}
+function fit(animate){
+  const bb = bounds();
+  const padT = 118, padB = 100, padX = 22;
+  const k = Math.min((innerWidth-padX*2)/bb.w, (innerHeight-padT-padB)/bb.h, 1.15);
+  view.k = Math.max(0.16, k);
+  view.x = padX + (innerWidth-padX*2 - bb.w*view.k)/2 - bb.x*view.k;
+  view.y = padT + (innerHeight-padT-padB - bb.h*view.k)/2 - bb.y*view.k;
+  tree.style.transition = animate ? "transform .35s cubic-bezier(.2,.8,.3,1)" : "none";
+  applyView();
+  if(animate) setTimeout(()=>{ tree.style.transition = "none"; }, 380);
+}
+/* Sur téléphone, afficher le chapitre entier rend les icônes minuscules.
+   À l'ouverture on se place donc sur le "front" de progression, à une
+   échelle confortable. Le bouton ⊹ bascule entre les deux vues.          */
+function focus(animate){
+  const ch = chapter(chapId);
+  let cible = ch.quetes.filter(q => !isDone(q.id) && isAvailable(q));
+  if(!cible.length) cible = ch.quetes.filter(q => isDone(q.id));
+  if(!cible.length) cible = ch.quetes.slice(0, 3);
+  const cx = cible.reduce((s,q) => s+q.x, 0)/cible.length;
+  const cy = cible.reduce((s,q) => s+q.y, 0)/cible.length;
+  view.k = Math.min(1.05, Math.max(0.5, innerWidth/760));
+  view.x = innerWidth/2  - cx*view.k;
+  view.y = (innerHeight/2 + 20) - cy*view.k;
+  tree.style.transition = animate ? "transform .35s cubic-bezier(.2,.8,.3,1)" : "none";
+  applyView();
+  if(animate) setTimeout(()=>{ tree.style.transition = "none"; }, 380);
+}
+let vueLarge = false;
+function zoomAt(cx, cy, factor){
+  const k2 = Math.min(2.6, Math.max(0.14, view.k*factor));
+  const f = k2/view.k;
+  view.x = cx - (cx-view.x)*f;
+  view.y = cy - (cy-view.y)*f;
+  view.k = k2; applyView();
+}
+
+const stage = $("#stage");
+let pointers = new Map(), panStart = null, pinchStart = null, moved = false;
+let pressTimer = null, pressedId = null, hlActive = false, dragNode = null;
+
+stage.addEventListener("pointerdown", e => {
+  stage.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  moved = false;
+
+  if(pointers.size === 1){
+    if(openId) closeSheet();                     // toucher la carte referme la fiche
+    panStart = {x:e.clientX, y:e.clientY, vx:view.x, vy:view.y};
+    const g = e.target.closest && e.target.closest(".node");
+    pressedId = g ? g.dataset.id : null;
+
+    if(pressedId && admin && moveMode){
+      const q = ALL[pressedId];
+      dragNode = {id:pressedId, ox:q.x, oy:q.y, sx:e.clientX, sy:e.clientY};
+    } else if(pressedId && stateOf(ALL[pressedId]) === "locked"){
+      // appui long : seulement utile sur une quête encore verrouillée
+      pressTimer = setTimeout(() => showPath(pressedId), 420);
+    }
+  } else if(pointers.size === 2){
+    clearTimeout(pressTimer);
+    const [p1,p2] = Array.from(pointers.values());
+    pinchStart = {d: Math.hypot(p1.x-p2.x, p1.y-p2.y), k: view.k,
+                  cx: (p1.x+p2.x)/2, cy: (p1.y+p2.y)/2, vx: view.x, vy: view.y};
+    panStart = null;
+  }
+});
+
+stage.addEventListener("pointermove", e => {
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+  if(dragNode){
+    const q = ALL[dragNode.id];
+    q.x = Math.round(dragNode.ox + (e.clientX-dragNode.sx)/view.k);
+    q.y = Math.round(dragNode.oy + (e.clientY-dragNode.sy)/view.k);
+    if(Math.abs(e.clientX-dragNode.sx)+Math.abs(e.clientY-dragNode.sy) > 4) moved = true;
+    render();
+    return;
+  }
+
+  if(pointers.size === 2 && pinchStart){
+    const [p1,p2] = Array.from(pointers.values());
+    const d = Math.hypot(p1.x-p2.x, p1.y-p2.y);
+    const cx = (p1.x+p2.x)/2, cy = (p1.y+p2.y)/2;
+    const k2 = Math.min(2.6, Math.max(0.14, pinchStart.k * (d/pinchStart.d)));
+    const f = k2/pinchStart.k;
+    view.k = k2;
+    view.x = cx - (pinchStart.cx - pinchStart.vx)*f;
+    view.y = cy - (pinchStart.cy - pinchStart.vy)*f;
+    applyView(); moved = true; clearTimeout(pressTimer);
+    return;
+  }
+
+  if(panStart){
+    const dx = e.clientX-panStart.x, dy = e.clientY-panStart.y;
+    if(Math.abs(dx)+Math.abs(dy) > 7){ moved = true; clearTimeout(pressTimer); stage.classList.add("dragging"); }
+    view.x = panStart.vx + dx; view.y = panStart.vy + dy; applyView();
+  }
+});
+
+function endPointer(e){
+  clearTimeout(pressTimer);
+  pointers.delete(e.pointerId);
+  stage.classList.remove("dragging");
+
+  if(dragNode){
+    if(moved){ persistProgramme(); toast("Position enregistrée"); }
+    dragNode = null; panStart = null; pressedId = null; return;
+  }
+  if(hlActive){ clearPath(); pressedId = null; panStart = null; pinchStart = null; return; }
+
+  if(pointers.size === 0){
+    if(!moved && pressedId){
+      if(admin && linkMode) handleLinkTap(pressedId);
+      else openQuest(pressedId);
+    }
+    panStart = null; pinchStart = null; pressedId = null;
+  } else if(pointers.size === 1){
+    const p = Array.from(pointers.values())[0];
+    panStart = {x:p.x, y:p.y, vx:view.x, vy:view.y};
+    pinchStart = null;
+  }
+}
+stage.addEventListener("pointerup", endPointer);
+stage.addEventListener("pointercancel", endPointer);
+stage.addEventListener("wheel", e => {
+  e.preventDefault();
+  zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1/1.12);
+}, {passive:false});
+
+$("#btnZoomIn").onclick  = () => zoomAt(innerWidth/2, innerHeight/2, 1.25);
+$("#btnZoomOut").onclick = () => zoomAt(innerWidth/2, innerHeight/2, 1/1.25);
+$("#btnFit").onclick = () => {
+  vueLarge = !vueLarge;
+  if(vueLarge){ fit(true); toast("Vue d'ensemble du chapitre"); }
+  else        { focus(true); toast("Retour sur ta progression"); }
+};
+
+/* --------------------------------- APPUI LONG : chemin en bordeaux */
+function showPath(id){
+  const q = ALL[id];
+  if(!q || isDone(id)) return;
+  const {nodes, edges} = missingPath(id);
+  if(!nodes.size && isAvailable(q)){ toast("Cette quête est déjà réalisable"); return; }
+  hlActive = true;
+  nodes.forEach(n => nodeEls[n] && nodeEls[n].classList.add("hl"));
+  nodeEls[id] && nodeEls[id].classList.add("hl");
+  edges.forEach(k => { if(edgeEls[k]){ edgeEls[k].classList.add("hl");
+                                       edgeEls[k].setAttribute("marker-end","url(#ahh)"); } });
+  if(navigator.vibrate) navigator.vibrate(18);
+  const ext = Array.from(nodes).filter(n => ALL[n] && ALL[n]._ch !== chapId);
+  if(ext.length) toast("Il reste aussi " + ext.length + " étape(s) dans un autre chapitre");
+}
+function clearPath(){
+  hlActive = false;
+  $$(".node.hl").forEach(n => n.classList.remove("hl"));
+  for(const k in edgeEls){
+    edgeEls[k].classList.remove("hl");
+    edgeEls[k].setAttribute("marker-end", isDone(k.split("→")[0]) ? "url(#ahd)" : "url(#ah)");
+  }
+}
+
+/* ------------------------------------------------------------- SONS
+   Par défaut : synthétisés (aucun fichier, aucun droit d'auteur — les
+   sons d'origine FTB Quests/Minecraft sont protégés et ne peuvent pas
+   être redistribués). Le gérant peut déposer ses propres sons (panneau
+   "🔊 Sons") : dans ce cas ils remplacent la synthèse ci-dessous.       */
+let AC = null;
+const audio = () => (AC = AC || new (window.AudioContext||window.webkitAudioContext)());
+function tone(freq, t0, dur, type, gain){
+  const ac = audio(), o = ac.createOscillator(), g = ac.createGain();
+  o.type = type || "triangle"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain || 0.22, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function playCustom(src){ try{ const a = new Audio(src); a.volume = 0.85; a.play().catch(()=>{}); }catch(e){} }
+function sfxQuest(){
+  if(!prefs.sound) return;
+  if(SOUND.quest) return playCustom(SOUND.quest);
+  const t = audio().currentTime;
+  [[784,0],[1047,0.085],[1319,0.17]].forEach(([f,d]) => tone(f, t+d, 0.34, "triangle", 0.2));
+}
+function sfxGear(){
+  if(!prefs.sound) return;
+  if(SOUND.gear) return playCustom(SOUND.gear);
+  const t = audio().currentTime;
+  [[523,0],[659,0.11],[784,0.22],[1047,0.33]].forEach(([f,d]) => tone(f, t+d, 0.9, "triangle", 0.2));
+  [[1568,0.5],[2093,0.62]].forEach(([f,d]) => tone(f, t+d, 1.3, "sine", 0.11));
+  tone(261.6, t, 1.9, "sine", 0.14);
+  tone(392,   t+0.33, 1.6, "sine", 0.1);
+}
+
+/* ambiance sonore en boucle, facultative */
+let ambientEl = null;
+function applyAmbient(){
+  if(ambientEl){ ambientEl.pause(); ambientEl = null; }
+  if(SOUND.ambientOn && SOUND.ambient && prefs.sound){
+    ambientEl = new Audio(SOUND.ambient);
+    ambientEl.loop = true; ambientEl.volume = SOUND.ambientVolume ?? 0.35;
+    ambientEl.play().catch(()=>{ /* autoplay bloqué tant qu'il n'y a pas eu de geste */ });
+  }
+}
+/* ------------------------------------------------------------ TOAST */
+let toastT = null;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ------------------------------------------------------- FICHE QUÊTE */
+const sheet = $("#sheet"), sheetBody = $("#sheetBody");
+let openId = null;
+
+function closeSheet(){ sheet.classList.remove("open"); openId = null; }
+$("#grab").onclick = closeSheet;
+sheet.addEventListener("pointerdown", e => { if(e.target.id === "grab") closeSheet(); });
+
+const TYPE_LABEL = {
+  square:["■","Étape obligatoire"],
+  circle:["●","Bonus optionnel"],
+  gear:  ["✦","Point clé — débloque la suite"]
+};
+
+function videoHtml(url){
+  if(!url) return `<div class="vidbox">🎬 Vidéo de démonstration à venir<br><small>Le gérant pourra l'ajouter depuis l'espace gérant.</small></div>`;
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  if(yt) return `<div class="vidbox"><iframe src="https://www.youtube.com/embed/${yt[1]}?rel=0&playsinline=1" allowfullscreen allow="encrypted-media;picture-in-picture"></iframe></div>`;
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  if(vm) return `<div class="vidbox"><iframe src="https://player.vimeo.com/video/${vm[1]}" allowfullscreen></iframe></div>`;
+  return `<div class="vidbox"><video src="${url}" controls playsinline preload="metadata"></video></div>`;
+}
+
+function openQuest(id){
+  const q = ALL[id]; if(!q) return;
+  openId = id;
+  const st = stateOf(q);
+  const [sym, lbl] = TYPE_LABEL[q.type] || TYPE_LABEL.square;
+
+  let blocked = "";
+  if(st === "locked"){
+    const names = (q.deps||[]).filter(d => !isDone(d))
+                  .map(d => ALL[d] ? ALL[d].titre : d);
+    blocked = `<div class="reqline"><b>Verrouillée.</b> À valider d'abord : ${names.join(" · ")}
+      <br><small>Astuce : reste appuyé sur une icône verrouillée pour voir tout le chemin en rouge.</small></div>`;
+  }
+
+  const crit = (q.criteres||[]).map(c => `<li>${escapeHtml(c)}</li>`).join("");
+
+  sheetBody.innerHTML = `
+    <span class="qtype ${q.type}">${sym} ${lbl}</span>
+    <h3>${escapeHtml(q.titre)}</h3>
+    ${blocked}
+    ${videoHtml(q.video)}
+    <p class="desc">${escapeHtml(q.desc||"")}</p>
+    ${crit ? `<label class="f">Critères de validation</label><ul class="crit">${crit}</ul>` : ""}
+    <div class="sheetActions">
+      ${ st === "done"
+          ? `<button class="btn" id="qUndo">↺ Annuler la validation</button>`
+          : (st === "avail"
+              ? `<button class="btn primary" id="qDo">✓ Je l'ai réussi — valider</button>`
+              : `<button class="btn" id="qPath">Voir le chemin à parcourir</button>`) }
+    </div>
+    ${ admin ? adminForm(q) : "" }
+  `;
+  sheet.classList.add("open");
+
+  const doBtn = $("#qDo");   if(doBtn)   doBtn.onclick   = () => validate(id);
+  const unBtn = $("#qUndo"); if(unBtn)   unBtn.onclick   = () => unvalidate(id);
+  const pBtn  = $("#qPath"); if(pBtn)    pBtn.onclick    = () => { closeSheet(); setTimeout(()=>showPath(id),260);
+                                                                  setTimeout(clearPath, 4200); };
+  if(admin) wireAdminForm(q);
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function validate(id){
+  const q = ALL[id]; if(!q || !isAvailable(q)) return;
+  prog.done[id] = new Date().toISOString();
+  Store.saveProgression(prog);
+  paint();
+  const g = nodeEls[id];
+  if(g){ g.classList.add("pulse"); setTimeout(()=>g.classList.remove("pulse"), 520); }
+  if(q.type === "gear"){ sfxGear(); if(navigator.vibrate) navigator.vibrate([25,60,25,60,45]); }
+  else                 { sfxQuest(); if(navigator.vibrate) navigator.vibrate(22); }
+  closeSheet();
+  renderChapters();
+
+  if(q.type === "gear"){
+    const next = PROG.chapitres.find(c => (c.requis||[]).includes(id) && chapUnlocked(c));
+    toast(next ? "★ Point clé validé — « " + next.titre + " » est débloqué !"
+               : "★ Point clé validé !");
+  } else {
+    const opened = Object.values(ALL).filter(x => x._ch === chapId && !isDone(x.id) &&
+                    (x.deps||[]).includes(id) && isAvailable(x));
+    toast(opened.length ? "Validé — " + opened.length + " nouvelle(s) quête(s) débloquée(s)" : "Quête validée");
+  }
+}
+
+function unvalidate(id){
+  // on retire aussi tout ce qui dépendait de cette quête (cohérence de l'arbre)
+  const removed = [];
+  (function cascade(x){
+    if(!prog.done[x]) return;
+    delete prog.done[x]; removed.push(x);
+    Object.values(ALL).forEach(o => { if((o.deps||[]).includes(x)) cascade(o.id); });
+  })(id);
+  Store.saveProgression(prog);
+  paint(); closeSheet(); renderChapters();
+  toast(removed.length > 1 ? removed.length + " quêtes ont été dévalidées" : "Validation annulée");
+}
+
+/* --------------------------------------------------------- TIROIR */
+const drawer = $("#drawer"), scrim = $("#scrim");
+function openDrawer(){ drawer.classList.add("open"); scrim.classList.add("open"); renderChapters(); }
+function closeDrawer(){ drawer.classList.remove("open"); scrim.classList.remove("open"); }
+$("#btnMenu").onclick = openDrawer;
+scrim.onclick = () => { closeDrawer(); closeSheet(); };
+
+function renderChapters(){
+  const list = $("#chapList"); list.innerHTML = "";
+  PROG.chapitres.forEach(ch => {
+    const unlocked = chapUnlocked(ch);
+    const tot = ch.quetes.length || 1;
+    const n = ch.quetes.filter(q => isDone(q.id)).length;
+    const b = document.createElement("div");
+    b.className = "chapItem" + (ch.id === chapId ? " active" : "") + (unlocked ? "" : " lockedCh");
+    b.innerHTML = `
+      <div class="ct">${ch.annexe ? "📎" : (ch.numero ? "Ch." + ch.numero : "")} ${escapeHtml(ch.titre)}
+        ${unlocked ? "" : '<span class="badge lock">🔒 aperçu</span>'}
+        ${ch.brouillon ? '<span class="badge">brouillon</span>' : ''}</div>
+      <div class="cs">${escapeHtml(ch.sousTitre||"")}</div>
+      <div class="bar"><i style="width:${(n/tot*100).toFixed(0)}%"></i></div>
+      ${ admin ? `<div class="adminRow">
+            <button class="miniBtn" data-act="edit">✏️ Renommer / requis</button>
+            <button class="miniBtn danger" data-act="del">🗑 Supprimer</button>
+          </div>` : "" }`;
+    b.onclick = (e) => {
+      const act = e.target.closest("[data-act]");
+      if(act){ e.stopPropagation();
+        if(act.dataset.act === "edit") editChapter(ch.id);
+        else deleteChapter(ch.id);
+        return;
+      }
+      chapId = ch.id; prefs.chapitre = ch.id; Store.savePrefs(prefs);
+      closeDrawer(); closeSheet(); render();
+      vueLarge = false; focus(false);
+    };
+    list.appendChild(b);
+  });
+  if(admin){
+    const nb = document.createElement("button");
+    nb.className = "btn ghost"; nb.style.marginTop = "6px";
+    nb.textContent = "🗂 + Nouveau chapitre";
+    nb.onclick = createChapter;
+    list.appendChild(nb);
+  }
+}
+
+function createChapter(){
+  const titre = prompt("Titre du nouveau chapitre :"); if(!titre) return;
+  const numeros = PROG.chapitres.filter(c => !c.annexe && c.numero).map(c => c.numero);
+  const id = "ch_" + Date.now().toString(36);
+  PROG.chapitres.push({ id, numero: numeros.length ? Math.max(...numeros)+1 : 1,
+                         titre, sousTitre:"", requis:[], quetes:[] });
+  persistProgramme(); renderChapters();
+  toast("Chapitre créé — ouvre « + Quête » depuis ce chapitre pour le remplir");
+}
+function editChapter(id){
+  const ch = chapter(id); if(!ch) return;
+  const titre = prompt("Titre du chapitre :", ch.titre); if(titre === null) return;
+  const sousTitre = prompt("Sous-titre :", ch.sousTitre||""); if(sousTitre === null) return;
+  const reqTxt = prompt(
+    "Id(s) de quête requise pour débloquer ce chapitre, séparés par une virgule (laisser vide = toujours accessible) :",
+    (ch.requis||[]).join(", "));
+  if(reqTxt === null) return;
+  ch.titre = titre.trim() || ch.titre;
+  ch.sousTitre = sousTitre.trim();
+  ch.requis = reqTxt.split(",").map(s=>s.trim()).filter(Boolean);
+  persistProgramme(); renderChapters(); if(id===chapId) updateChrome();
+  toast("Chapitre mis à jour");
+}
+function deleteChapter(id){
+  if(PROG.chapitres.length <= 1){ toast("Il doit rester au moins un chapitre"); return; }
+  const ch = chapter(id); if(!ch) return;
+  if(!confirm("Supprimer le chapitre « " + ch.titre + " » et toutes ses quêtes ?\nLes flèches et prérequis qui y menaient seront retirés.")) return;
+  const ids = new Set(ch.quetes.map(q => q.id));
+  PROG.chapitres = PROG.chapitres.filter(c => c.id !== id);
+  PROG.chapitres.forEach(c => {
+    c.requis = (c.requis||[]).filter(r => !ids.has(r));
+    c.quetes.forEach(q => {
+      q.deps  = (q.deps ||[]).filter(d => !ids.has(d));
+      q.liens = (q.liens||[]).filter(d => !ids.has(d));
+    });
+  });
+  ids.forEach(qid => delete prog.done[qid]);
+  Store.saveProgression(prog);
+  if(chapId === id) chapId = PROG.chapitres[0].id;
+  persistProgramme(); render(); renderChapters(); focus(false);
+  toast("Chapitre supprimé");
+}
+
+$("#btnSound").onclick = () => {
+  prefs.sound = !prefs.sound; Store.savePrefs(prefs);
+  $("#btnSound").textContent = prefs.sound ? "🔊 Sons : activés" : "🔇 Sons : coupés";
+  applyAmbient();
+  if(prefs.sound) sfxQuest();
+};
+$("#btnReset").onclick = () => {
+  if(!confirm("Effacer toute ta progression ? Le programme (quêtes, vidéos) n'est pas touché.")) return;
+  prog = {done:{}}; Store.saveProgression(prog);
+  paint(); renderChapters(); toast("Progression réinitialisée");
+};
+/* ==================================================== ESPACE GÉRANT
+   Protégé par un code (par défaut 1234, modifiable).
+   Permet d'éditer les quêtes, coller les liens vidéo, déplacer les
+   nœuds au doigt, ajouter/supprimer des étapes, exporter/importer.  */
+function persistProgramme(){ reindex(); Store.saveProgramme(PROG); }
+
+/* ---- liaison visuelle des flèches (mode "🔗 Lier") ---- */
+function ancestorsOf(id, seen){
+  seen = seen || new Set();
+  const q = ALL[id]; if(!q) return seen;
+  incoming(q).forEach(d => { if(d !== id && !seen.has(d)){ seen.add(d); ancestorsOf(d, seen); } });
+  return seen;
+}
+/* ajouter fromId -> toId créerait un cycle si toId est déjà un ancêtre de fromId
+   (c'est-à-dire si fromId dépend déjà, même indirectement, de toId) */
+function wouldCreateCycle(fromId, toId){
+  if(fromId === toId) return true;
+  return ancestorsOf(fromId).has(toId);
+}
+function handleLinkTap(id){
+  if(!linkSource){
+    linkSource = id;
+    nodeEls[id] && nodeEls[id].classList.add("linkSel");
+    toast("Source choisie : « " + ALL[id].titre + " » — touche la quête cible");
+    return;
+  }
+  if(linkSource === id){
+    nodeEls[id] && nodeEls[id].classList.remove("linkSel");
+    linkSource = null; toast("Sélection annulée");
+    return;
+  }
+  const fromId = linkSource, toId = id, from = ALL[fromId], to = ALL[toId];
+  nodeEls[fromId] && nodeEls[fromId].classList.remove("linkSel");
+  linkSource = null;
+  if(!from || !to) return;
+  if(wouldCreateCycle(fromId, toId)){ toast("Impossible : cela créerait une dépendance circulaire"); return; }
+  if((to.deps||[]).includes(fromId) || (to.liens||[]).includes(fromId)){
+    toast("Ces deux quêtes sont déjà reliées"); return;
+  }
+  const bloquant = confirm(
+    "Flèche de « " + from.titre + " » vers « " + to.titre + " ».\n\n" +
+    "OK = BLOQUANTE (trait plein, obligatoire)\nAnnuler = choisir OPTIONNELLE"
+  );
+  if(bloquant){
+    to.deps = (to.deps||[]).concat(fromId);
+  } else if(confirm("Créer une flèche OPTIONNELLE (pointillée, ne bloque jamais) ?")){
+    to.liens = (to.liens||[]).concat(fromId);
+  } else { toast("Liaison annulée"); return; }
+  persistProgramme(); render(); toast("Flèche créée");
+}
+function removeLink(fromId, toId){
+  const to = ALL[toId]; if(!to) return;
+  const from = ALL[fromId];
+  if(!confirm("Supprimer la flèche « " + (from?from.titre:fromId) + " » → « " + to.titre + " » ?")) return;
+  to.deps  = (to.deps ||[]).filter(d => d !== fromId);
+  to.liens = (to.liens||[]).filter(d => d !== fromId);
+  persistProgramme(); render(); toast("Flèche supprimée");
+}
+
+$("#btnAdminLogin").onclick = () => {
+  const code = prompt("Code gérant :");
+  if(code === null) return;
+  if(code !== prefs.pin){ toast("Code incorrect"); return; }
+  admin = true;
+  $("#adminBar").classList.add("on");
+  closeDrawer();
+  toast("Mode gérant activé");
+};
+$("#btnExitAdmin").onclick = () => {
+  admin = false; moveMode = false; linkMode = false; linkSource = null;
+  $("#btnMove").classList.remove("on"); $("#btnMove").textContent = "Déplacer : off";
+  $("#btnLink").classList.remove("on"); $("#btnLink").textContent = "🔗 Lier : off";
+  tree.classList.remove("linking");
+  $$(".node.linkSel").forEach(n => n.classList.remove("linkSel"));
+  $("#adminBar").classList.remove("on"); closeSheet(); toast("Mode gérant quitté");
+};
+$("#btnMove").onclick = () => {
+  moveMode = !moveMode;
+  if(moveMode){ linkMode = false; linkSource = null; tree.classList.remove("linking");
+                $("#btnLink").classList.remove("on"); $("#btnLink").textContent = "🔗 Lier : off"; }
+  $("#btnMove").classList.toggle("on", moveMode);
+  $("#btnMove").textContent = "Déplacer : " + (moveMode ? "ON" : "off");
+  toast(moveMode ? "Fais glisser les icônes pour les repositionner" : "Déplacement désactivé");
+};
+$("#btnLink").onclick = () => {
+  linkMode = !linkMode; linkSource = null;
+  $$(".node.linkSel").forEach(n => n.classList.remove("linkSel"));
+  if(linkMode){ moveMode = false; $("#btnMove").classList.remove("on"); $("#btnMove").textContent = "Déplacer : off"; }
+  tree.classList.toggle("linking", linkMode);
+  $("#btnLink").classList.toggle("on", linkMode);
+  $("#btnLink").textContent = "🔗 Lier : " + (linkMode ? "ON" : "off");
+  toast(linkMode ? "Touche une quête source, puis la cible. Touche une flèche pour la supprimer."
+                 : "Mode liaison désactivé");
+};
+$("#btnTheme").onclick = openApparence;
+$("#btnSounds").onclick = openSons;
+$("#btnAdd").onclick = () => {
+  const titre = prompt("Titre de la nouvelle quête :"); if(!titre) return;
+  const ch = chapter(chapId);
+  const id = ch.id + "_" + Date.now().toString(36);
+  const c = bounds();
+  ch.quetes.push({id, type:"square", size:1, icon:"⭐", titre,
+                  x: Math.round(c.x + c.w/2), y: Math.round(c.y + c.h + 120),
+                  deps: [], desc:"", criteres:[], video:""});
+  persistProgramme(); render(); openQuest(id);
+  toast("Quête créée — remplis sa fiche, puis place-la avec « Déplacer »");
+};
+
+function adminForm(q){
+  const ch = chapter(chapId);
+  const opts = ch.quetes.filter(o => o.id !== q.id)
+    .map(o => `<option value="${o.id}" ${(q.deps||[]).includes(o.id)?"selected":""}>${escapeHtml(o.titre)}</option>`).join("");
+  const optsL = ch.quetes.filter(o => o.id !== q.id)
+    .map(o => `<option value="${o.id}" ${(q.liens||[]).includes(o.id)?"selected":""}>${escapeHtml(o.titre)}</option>`).join("");
+  return `
+  <hr style="border:0;border-top:1px solid #ffffff18;margin:20px 0 4px">
+  <label class="f">🔧 Gérant — titre</label>
+  <input class="f" id="aTitre" value="${escapeHtml(q.titre)}">
+  <label class="f">Type</label>
+  <select class="f" id="aType">
+    <option value="square" ${q.type==="square"?"selected":""}>■ Carré — obligatoire</option>
+    <option value="circle" ${q.type==="circle"?"selected":""}>● Rond — optionnel</option>
+    <option value="gear"   ${q.type==="gear"  ?"selected":""}>✦ Engrenage — point clé</option>
+  </select>
+  <label class="f">Taille (importance) : <span id="aSizeV">${q.size||1}</span></label>
+  <input class="f" id="aSize" type="range" min="0.5" max="1.8" step="0.05" value="${q.size||1}">
+  <label class="f">Icône (emoji ou 1 caractère)</label>
+  <input class="f" id="aIcon" value="${escapeHtml(q.icon||"")}">
+  <label class="f">Image personnalisée (remplace l'emoji dans le nœud)</label>
+  <div class="iconPreviewRow">
+    <div class="prev" id="aIconPrev">${q.iconImg ? `<img src="${q.iconImg}">` : escapeHtml(q.icon||"•")}</div>
+    <div class="stack">
+      <input class="f" id="aIconFile" type="file" accept="image/*">
+      <button class="miniBtn danger" id="aIconClear">Retirer l'image, revenir à l'emoji</button>
+    </div>
+  </div>
+  <label class="f">Lien vidéo (YouTube, Vimeo ou .mp4)</label>
+  <input class="f" id="aVideo" placeholder="https://youtu.be/..." value="${escapeHtml(q.video||"")}">
+  <label class="f">Description</label>
+  <textarea class="f" id="aDesc">${escapeHtml(q.desc||"")}</textarea>
+  <label class="f">Critères de validation (un par ligne)</label>
+  <textarea class="f" id="aCrit">${escapeHtml((q.criteres||[]).join("\n"))}</textarea>
+  <label class="f">Étapes précédentes OBLIGATOIRES (flèches pleines — elles bloquent)</label>
+  <select class="f" id="aDeps" multiple size="6">${opts}</select>
+  <label class="f">Étapes précédentes OPTIONNELLES (flèches pointillées — ne bloquent pas)</label>
+  <select class="f" id="aLiens" multiple size="4">${optsL}</select>
+  <div class="sheetActions" style="margin-top:14px">
+    <button class="btn primary" id="aSave">Enregistrer</button>
+    <button class="btn danger"  id="aDel">Supprimer cette quête</button>
+  </div>
+  <div class="sheetActions">
+    <button class="btn ghost" id="aExport">⬇ Exporter le programme (.json)</button>
+    <button class="btn ghost" id="aImport">⬆ Importer un programme</button>
+    <button class="btn ghost" id="aPin">Changer le code gérant</button>
+    <button class="btn ghost" id="aRestore">Revenir au programme d'origine</button>
+  </div>`;
+}
+
+function wireAdminForm(q){
+  const sizeI = $("#aSize");
+  sizeI.oninput = () => { $("#aSizeV").textContent = sizeI.value; };
+
+  $("#aIconFile").onchange = () => {
+    const f = $("#aIconFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => {
+      q.iconImg = url;
+      persistProgramme();
+      render();
+      const prev = $("#aIconPrev"); if(prev) prev.innerHTML = `<img src="${url}">`;
+      toast("Image enregistrée");
+    });
+  };
+  $("#aIconClear").onclick = () => {
+    delete q.iconImg; persistProgramme(); render();
+    const prev = $("#aIconPrev"); if(prev) prev.textContent = $("#aIcon").value || "•";
+    toast("Image retirée");
+  };
+
+  $("#aSave").onclick = () => {
+    q.titre = $("#aTitre").value.trim() || q.titre;
+    q.type  = $("#aType").value;
+    q.size  = parseFloat(sizeI.value);
+    q.icon  = $("#aIcon").value.trim() || "•";
+    q.video = $("#aVideo").value.trim();
+    q.desc  = $("#aDesc").value.trim();
+    q.criteres = $("#aCrit").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    q.deps  = Array.from($("#aDeps").selectedOptions).map(o => o.value);
+    q.liens = Array.from($("#aLiens").selectedOptions).map(o => o.value)
+                   .filter(id => !q.deps.includes(id));
+    persistProgramme(); render(); closeSheet(); toast("Quête enregistrée");
+  };
+  $("#aDel").onclick = () => {
+    if(!confirm("Supprimer « " + q.titre + " » ? Les flèches et prérequis de chapitre qui y mènent seront retirés.")) return;
+    const ch = chapter(chapId);
+    ch.quetes = ch.quetes.filter(o => o.id !== q.id);
+    PROG.chapitres.forEach(c => {
+      c.requis = (c.requis||[]).filter(r => r !== q.id);
+      c.quetes.forEach(o => {
+        o.deps  = (o.deps ||[]).filter(d => d !== q.id);
+        o.liens = (o.liens||[]).filter(d => d !== q.id);
+      });
+    });
+    delete prog.done[q.id]; Store.saveProgression(prog);
+    persistProgramme(); render(); closeSheet(); toast("Quête supprimée");
+  };
+  $("#aExport").onclick = () => {
+    const blob = new Blob([JSON.stringify(PROG, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "programme-ninja.json"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  };
+  $("#aImport").onclick = () => {
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json,application/json";
+    inp.onchange = () => {
+      const f = inp.files[0]; if(!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try{
+          const o = JSON.parse(rd.result);
+          if(!o.chapitres) throw 0;
+          PROG.chapitres = o.chapitres; PROG.titre = o.titre || PROG.titre;
+          persistProgramme();
+          if(!chapter(chapId)) chapId = PROG.chapitres[0].id;
+          render(); focus(true); closeSheet(); renderChapters(); toast("Programme importé");
+        }catch(e){ toast("Fichier illisible"); }
+      };
+      rd.readAsText(f);
+    };
+    inp.click();
+  };
+  $("#aPin").onclick = () => {
+    const p = prompt("Nouveau code gérant (chiffres) :", prefs.pin);
+    if(p){ prefs.pin = p; Store.savePrefs(prefs); toast("Code mis à jour"); }
+  };
+  $("#aRestore").onclick = () => {
+    if(!confirm("Revenir au programme d'origine ? Toutes tes modifications de quêtes seront perdues.")) return;
+    Store.resetProgramme();
+    location.reload();
+  };
+}
+
+/* ============================================================ APPARENCE
+   Panneau gérant : couleurs des 3 formes, des états verrouillé/validé,
+   des flèches et de la surbrillance. Réutilise la fiche du bas (#sheet). */
+function swatch(id, label, hint, value){
+  return `<div class="swatchRow">
+    <input type="color" id="${id}" value="${value}">
+    <span>${label}${hint?`<small>${hint}</small>`:""}</span>
+  </div>`;
+}
+function openApparence(){
+  openId = null;
+  sheetBody.innerHTML = `
+    <h3>🎨 Apparence</h3>
+    <p class="desc">Couleurs des formes, des états et des flèches de l'arbre. Les changements s'appliquent à toutes les quêtes.</p>
+
+    <div class="sectionTitle">Carrés — obligatoires</div>
+    ${swatch("thSquareFill","Fond","couleur quand la quête est disponible", THEME.square.fill)}
+    ${swatch("thSquareBorder","Bordure","", THEME.square.border)}
+
+    <div class="sectionTitle">Ronds — bonus</div>
+    ${swatch("thCircleFill","Fond","", THEME.circle.fill)}
+    ${swatch("thCircleBorder","Bordure","", THEME.circle.border)}
+
+    <div class="sectionTitle">Engrenages — points clés</div>
+    ${swatch("thGearFill","Fond","", THEME.gear.fill)}
+    ${swatch("thGearBorder","Bordure","", THEME.gear.border)}
+
+    <div class="sectionTitle">États (communs aux 3 formes)</div>
+    ${swatch("thLockedFill","Verrouillé — fond","", THEME.locked.fill)}
+    ${swatch("thLockedBorder","Verrouillé — bordure","", THEME.locked.border)}
+    ${swatch("thDoneFill","Validé — fond","", THEME.done.fill)}
+    ${swatch("thDoneBorder","Validé — bordure","", THEME.done.border)}
+
+    <div class="sectionTitle">Flèches</div>
+    ${swatch("thEdge","Bloquante (trait plein)","", THEME.edge)}
+    ${swatch("thEdgeOpt","Optionnelle (pointillé)","", THEME.edgeOptional)}
+    ${swatch("thEdgeDone","Validée","", THEME.edgeDone)}
+
+    <div class="sectionTitle">Surbrillance (appui long)</div>
+    ${swatch("thHl","Chemin manquant","", THEME.highlight)}
+    ${swatch("thHlGlow","Lueur","", THEME.highlightGlow)}
+
+    <div class="sheetActions" style="margin-top:18px">
+      <button class="btn primary" id="thSave">Enregistrer</button>
+      <button class="btn ghost" id="thReset">Réinitialiser l'apparence d'origine</button>
+    </div>`;
+  sheet.classList.add("open");
+  $("#thSave").onclick = () => {
+    THEME = {
+      square:{ fill:$("#thSquareFill").value, border:$("#thSquareBorder").value },
+      circle:{ fill:$("#thCircleFill").value, border:$("#thCircleBorder").value },
+      gear:  { fill:$("#thGearFill").value,   border:$("#thGearBorder").value },
+      locked:{ fill:$("#thLockedFill").value, border:$("#thLockedBorder").value },
+      done:  { fill:$("#thDoneFill").value,   border:$("#thDoneBorder").value },
+      edge:$("#thEdge").value, edgeOptional:$("#thEdgeOpt").value, edgeDone:$("#thEdgeDone").value,
+      highlight:$("#thHl").value, highlightGlow:$("#thHlGlow").value
+    };
+    Store.saveTheme(THEME); applyTheme(); render(); closeSheet(); toast("Apparence enregistrée");
+  };
+  $("#thReset").onclick = () => {
+    if(!confirm("Revenir aux couleurs d'origine ?")) return;
+    THEME = JSON.parse(JSON.stringify(DEFAULT_THEME));
+    Store.resetTheme(); applyTheme(); render(); openApparence(); toast("Apparence réinitialisée");
+  };
+}
+
+/* ================================================================ SONS
+   Panneau gérant : sons de validation par type + son d'ambiance.
+   Import de fichiers audio possédés par l'utilisateur (pas de sons
+   FTB Quests/Minecraft, protégés par le droit d'auteur).                */
+function fileToDataUrl(file, cb){
+  const rd = new FileReader();
+  rd.onload = () => cb(rd.result);
+  rd.onerror = () => toast("Fichier illisible");
+  rd.readAsDataURL(file);
+}
+function soundRow(id, label, current){
+  return `<div class="iconPreviewRow">
+    <div class="stack">
+      <span style="font-size:13.5px">${label}</span>
+      <small class="hint" style="margin:0">${current ? "Son personnalisé actif" : "Son synthétisé par défaut"}</small>
+      <input class="f" id="${id}File" type="file" accept="audio/*">
+      <div style="display:flex;gap:8px">
+        <button class="miniBtn" id="${id}Test">▶ Écouter</button>
+        <button class="miniBtn danger" id="${id}Clear">Revenir au son par défaut</button>
+      </div>
+    </div>
+  </div>`;
+}
+function openSons(){
+  openId = null;
+  sheetBody.innerHTML = `
+    <h3>🔊 Sons</h3>
+    <p class="hint">Les sons d'origine FTB Quests/Minecraft sont protégés par le droit d'auteur et ne peuvent pas être intégrés à l'appli. Tu peux en revanche déposer ici tes propres sons (enregistrés, achetés avec licence, ou libres de droits) au format mp3/ogg/wav — ils remplacent alors la synthèse par défaut.</p>
+
+    <div class="sectionTitle">Validation — carré / rond</div>
+    ${soundRow("sQuest","Son de quête", SOUND.quest)}
+
+    <div class="sectionTitle">Validation — engrenage</div>
+    ${soundRow("sGear","Son de point clé", SOUND.gear)}
+
+    <div class="sectionTitle">Ambiance</div>
+    <div class="swatchRow" style="align-items:center">
+      <span>Musique / ambiance en boucle</span>
+      <button class="miniBtn${SOUND.ambientOn?" on":""}" id="sAmbToggle" style="${SOUND.ambientOn?"background:#ffcf7a;color:#3a2b12":""}">${SOUND.ambientOn?"Activée":"Coupée"}</button>
+    </div>
+    <input class="f" id="sAmbFile" type="file" accept="audio/*">
+    <label class="f">Volume ambiance : <span id="sAmbVolV">${Math.round((SOUND.ambientVolume??0.35)*100)}%</span></label>
+    <input class="f" id="sAmbVol" type="range" min="0" max="1" step="0.05" value="${SOUND.ambientVolume??0.35}">
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="miniBtn" id="sAmbClear">Retirer l'ambiance</button>
+    </div>
+
+    <div class="sheetActions" style="margin-top:18px">
+      <button class="btn primary" id="sClose">Fermer</button>
+    </div>`;
+  sheet.classList.add("open");
+
+  const saveSoundOrWarn = (okMsg) => { if(Store.saveSound(SOUND)) toast(okMsg);
+    else toast("Fichier trop volumineux pour être enregistré (stockage plein)"); };
+
+  $("#sQuestFile").onchange = () => { const f = $("#sQuestFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => { SOUND.quest = url; saveSoundOrWarn("Son de quête enregistré"); openSons(); }); };
+  $("#sQuestTest").onclick = sfxQuest;
+  $("#sQuestClear").onclick = () => { SOUND.quest = null; Store.saveSound(SOUND); toast("Retour au son par défaut"); openSons(); };
+
+  $("#sGearFile").onchange = () => { const f = $("#sGearFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => { SOUND.gear = url; saveSoundOrWarn("Son de point clé enregistré"); openSons(); }); };
+  $("#sGearTest").onclick = sfxGear;
+  $("#sGearClear").onclick = () => { SOUND.gear = null; Store.saveSound(SOUND); toast("Retour au son par défaut"); openSons(); };
+
+  $("#sAmbToggle").onclick = () => {
+    SOUND.ambientOn = !SOUND.ambientOn; Store.saveSound(SOUND); applyAmbient(); openSons();
+  };
+  $("#sAmbFile").onchange = () => { const f = $("#sAmbFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => { SOUND.ambient = url; saveSoundOrWarn("Ambiance enregistrée"); applyAmbient(); openSons(); }); };
+  $("#sAmbVol").oninput = () => { $("#sAmbVolV").textContent = Math.round($("#sAmbVol").value*100)+"%"; };
+  $("#sAmbVol").onchange = () => { SOUND.ambientVolume = parseFloat($("#sAmbVol").value); Store.saveSound(SOUND); if(ambientEl) ambientEl.volume = SOUND.ambientVolume; };
+  $("#sAmbClear").onclick = () => { SOUND.ambient = null; SOUND.ambientOn = false; Store.saveSound(SOUND); applyAmbient(); toast("Ambiance retirée"); openSons(); };
+
+  $("#sClose").onclick = closeSheet;
+}
+
+/* ------------------------------------------------------------- INIT */
+$("#btnSound").textContent = prefs.sound ? "🔊 Sons : activés" : "🔇 Sons : coupés";
+applyTheme();
+if(!chapter(chapId)) chapId = PROG.chapitres[0].id;
+render();
+focus(false);
+renderChapters();
+/* l'ambiance ne peut démarrer qu'après un premier geste (règles autoplay des navigateurs) */
+addEventListener("pointerdown", function startAmbientOnce(){
+  removeEventListener("pointerdown", startAmbientOnce);
+  applyAmbient();
+}, {once:true});
+
+addEventListener("resize", () => { /* on garde la vue, juste le fond se redessine */ });
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault());
+
+/* service worker : rend l'appli utilisable hors-ligne une fois installée */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
