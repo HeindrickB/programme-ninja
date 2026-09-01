@@ -62,6 +62,9 @@ svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .node.pulse .shape{animation:pop .5s ease}
 @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
 .node.done .shape{filter:drop-shadow(0 0 7px rgba(90,220,110,.55))}
+.node.carry .shape{stroke-dasharray:6 4}
+.node .carrytag{text-anchor:middle;font-weight:700;fill:#ffd79a;paint-order:stroke;
+  stroke:rgba(0,0,0,.75);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
 
 /* ---------- barre du haut ---------- */
 #topbar{position:absolute;z-index:5;top:calc(var(--safe-t) + 10px);left:0;right:0;
@@ -328,14 +331,25 @@ function reindex(){
 reindex();
 
 const chapter = id => PROG.chapitres.find(c => c.id === id);
-const isDone  = id => !!prog.done[id];
+/* Une quête "carryFrom" (reprise automatique d'un point clé d'un chapitre
+   précédent) n'a pas sa propre validation : son état est calculé à partir
+   de la quête d'origine, en direct — jamais stocké séparément. */
+const isDone  = id => {
+  const q = ALL[id];
+  return (q && q.carryFrom) ? !!prog.done[q.carryFrom] : !!prog.done[id];
+};
 
 /* Une quête est réalisable si TOUTES ses dépendances BLOQUANTES sont validées.
    Les "liens" (flèches venant d'un rond optionnel) ne bloquent jamais. */
 function isAvailable(q){ return (q.deps||[]).every(isDone); }
 /* toutes les flèches entrantes, bloquantes ou non */
 const incoming = q => (q.deps||[]).concat(q.liens||[]);
-function stateOf(q){ return isDone(q.id) ? "done" : (isAvailable(q) ? "avail" : "locked"); }
+/* Une quête "carryFrom" n'est jamais "avail" (on ne la valide pas à la main) :
+   elle est soit déjà acquise (reprise), soit verrouillée en attendant l'original. */
+function stateOf(q){
+  if(q.carryFrom) return isDone(q.id) ? "done" : "locked";
+  return isDone(q.id) ? "done" : (isAvailable(q) ? "avail" : "locked");
+}
 
 /* Un chapitre est débloqué si tous ses engrenages requis sont validés. */
 function chapUnlocked(ch){ return (ch.requis||[]).every(isDone); }
@@ -481,7 +495,7 @@ function render(){
   // --- nœuds ---
   ch.quetes.forEach(q => {
     const r = radiusOf(q);
-    const g = el("g",{class:"node", transform:`translate(${q.x},${q.y})`, "data-id":q.id});
+    const g = el("g",{class:"node" + (q.carryFrom ? " carry" : ""), transform:`translate(${q.x},${q.y})`, "data-id":q.id});
 
     let shape;
     if(q.type === "circle")      shape = el("circle",{r, class:"shape"});
@@ -526,6 +540,14 @@ function render(){
       const t = el("text",{class:"label", y: r + fs + 6 + i*(fs+3), "font-size": fs.toFixed(1)});
       t.textContent = ln; g.appendChild(t);
     });
+
+    if(q.carryFrom){
+      const src = ALL[q.carryFrom];
+      const srcCh = src && chapter(src._ch);
+      const tag = el("text",{class:"carrytag", y:-r-11, "font-size":"11"});
+      tag.textContent = "↩ repris" + (srcCh ? (srcCh.numero ? " Ch." + srcCh.numero : " " + srcCh.titre) : "");
+      g.appendChild(tag);
+    }
 
     svgN.appendChild(g);
     nodeEls[q.id] = g;
@@ -843,7 +865,15 @@ function openQuest(id){
   const [sym, lbl] = TYPE_LABEL[q.type] || TYPE_LABEL.square;
 
   let blocked = "";
-  if(st === "locked"){
+  if(q.carryFrom){
+    const src = ALL[q.carryFrom];
+    const srcTitre = src ? src.titre : q.carryFrom;
+    const srcCh = src && chapter(src._ch);
+    const srcLabel = srcCh ? (srcCh.numero ? "chapitre " + srcCh.numero : srcCh.titre) : "un chapitre précédent";
+    blocked = (st === "done")
+      ? `<div class="reqline">↩ <b>Reprise automatique.</b> Déjà validée via « ${escapeHtml(srcTitre)} » (${escapeHtml(srcLabel)}).</div>`
+      : `<div class="reqline">↩ <b>Reprise automatique.</b> Se validera toute seule dès que « ${escapeHtml(srcTitre)} » sera validée (${escapeHtml(srcLabel)}).</div>`;
+  } else if(st === "locked"){
     const names = (q.deps||[]).filter(d => !isDone(d))
                   .map(d => ALL[d] ? ALL[d].titre : d);
     blocked = `<div class="reqline"><b>Verrouillée.</b> À valider d'abord : ${names.join(" · ")}
@@ -860,11 +890,13 @@ function openQuest(id){
     <p class="desc">${escapeHtml(q.desc||"")}</p>
     ${crit ? `<label class="f">Critères de validation</label><ul class="crit">${crit}</ul>` : ""}
     <div class="sheetActions">
-      ${ st === "done"
-          ? `<button class="btn" id="qUndo">↺ Annuler la validation</button>`
-          : (st === "avail"
-              ? `<button class="btn primary" id="qDo">✓ Je l'ai réussi — valider</button>`
-              : `<button class="btn" id="qPath">Voir le chemin à parcourir</button>`) }
+      ${ q.carryFrom
+          ? (st === "done" ? `<button class="btn" id="qUndo">↺ Annuler (annule aussi l'original)</button>` : "")
+          : ( st === "done"
+              ? `<button class="btn" id="qUndo">↺ Annuler la validation</button>`
+              : (st === "avail"
+                  ? `<button class="btn primary" id="qDo">✓ Je l'ai réussi — valider</button>`
+                  : `<button class="btn" id="qPath">Voir le chemin à parcourir</button>`) ) }
     </div>
     ${ admin ? adminForm(q) : "" }
   `;
@@ -881,7 +913,7 @@ function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
 function validate(id){
-  const q = ALL[id]; if(!q || !isAvailable(q)) return;
+  const q = ALL[id]; if(!q || q.carryFrom || !isAvailable(q)) return;
   prog.done[id] = new Date().toISOString();
   Store.saveProgression(prog);
   paint();
@@ -904,13 +936,24 @@ function validate(id){
 }
 
 function unvalidate(id){
-  // on retire aussi tout ce qui dépendait de cette quête (cohérence de l'arbre)
+  // Annuler une reprise (carryFrom) annule en réalité la quête d'origine —
+  // c'est elle qui porte la validation.
+  const q0 = ALL[id];
+  const startId = (q0 && q0.carryFrom) ? q0.carryFrom : id;
+
+  // on retire aussi tout ce qui dépendait de cette quête, y compris via une
+  // reprise dans un chapitre suivant (cohérence de l'arbre bout en bout)
   const removed = [];
+  const seen = new Set();
   (function cascade(x){
-    if(!prog.done[x]) return;
-    delete prog.done[x]; removed.push(x);
-    Object.values(ALL).forEach(o => { if((o.deps||[]).includes(x)) cascade(o.id); });
-  })(id);
+    if(seen.has(x)) return; seen.add(x);
+    if(prog.done[x]){ delete prog.done[x]; removed.push(x); }
+    // ids "affectés" par la perte de x : x lui-même, et toute quête qui le reprend
+    const affected = [x, ...Object.values(ALL).filter(o => o.carryFrom === x).map(o => o.id)];
+    Object.values(ALL).forEach(o => {
+      if(affected.some(a => (o.deps||[]).includes(a))) cascade(o.id);
+    });
+  })(startId);
   Store.saveProgression(prog);
   paint(); closeSheet(); renderChapters();
   toast(removed.length > 1 ? removed.length + " quêtes ont été dévalidées" : "Validation annulée");
@@ -1155,6 +1198,9 @@ function adminForm(q){
   </div>
   <label class="f">Lien vidéo (YouTube, Vimeo ou .mp4)</label>
   <input class="f" id="aVideo" placeholder="https://youtu.be/..." value="${escapeHtml(q.video||"")}">
+  <label class="f">↩ Reprise automatique — id d'une quête d'un chapitre précédent (laisser vide sinon).
+    Cette quête sera alors validée automatiquement dès que l'originale le sera, et ne pourra plus être validée à la main.</label>
+  <input class="f" id="aCarryFrom" placeholder="ex : c1_balancier" value="${escapeHtml(q.carryFrom||"")}">
   <label class="f">Description</label>
   <textarea class="f" id="aDesc">${escapeHtml(q.desc||"")}</textarea>
   <label class="f">Critères de validation (un par ligne)</label>
@@ -1201,6 +1247,8 @@ function wireAdminForm(q){
     q.size  = parseFloat(sizeI.value);
     q.icon  = $("#aIcon").value.trim() || "•";
     q.video = $("#aVideo").value.trim();
+    const cf = $("#aCarryFrom").value.trim();
+    if(cf) q.carryFrom = cf; else delete q.carryFrom;
     q.desc  = $("#aDesc").value.trim();
     q.criteres = $("#aCrit").value.split("\n").map(s=>s.trim()).filter(Boolean);
     q.deps  = Array.from($("#aDeps").selectedOptions).map(o => o.value);

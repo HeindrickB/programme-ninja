@@ -244,12 +244,27 @@ const PROGRAMME = {
       brouillon: true,
       quetes: [
 
+        /* ---- Point clé repris automatiquement du Chapitre 1 ----
+           Se valide tout seul dès que "c1_lache_regrab" est validé.
+           Sert de point de départ visible à ce chapitre. */
+        {
+          id: "c1_lache_regrab_ch2",
+          type: "gear", size: 1.4, icon: "🔗",
+          titre: "Lâché Regrab barre à barre",
+          x: 400, y: 330,
+          deps: [],
+          carryFrom: "c1_lache_regrab",
+          desc: "Reprise automatique du Chapitre 1 : le geste signature qui ouvre ce chapitre.",
+          criteres: [],
+          video: ""
+        },
+
         {
           id: "c2_grip_force",
           type: "square", size: 1.45, icon: "✊",
           titre: "Grip / Force (niveau 2)",
           x: 700, y: 330,
-          deps: ["c1_lache_regrab"],
+          deps: ["c1_lache_regrab_ch2"],
           desc: "Nouveau socle de force : la main doit maintenant tenir sur des supports qui ne sont plus des barres.",
           criteres: ["À définir"],
           video: ""
@@ -276,8 +291,12 @@ const PROGRAMME = {
         { id:"c2_gibbon_nunch",  type:"circle", size:0.9,  icon:"⌇", titre:"Gibbon sur nunchaku",  x:430, y:650, deps:["c2_gibbon_matche","c2_nunchaku"], desc:"Gibbon sur nunchakus.", criteres:["À définir"], video:"" },
         { id:"c2_gibbon_anneau", type:"circle", size:0.9,  icon:"⭕", titre:"Gibbon sur anneau",    x:450, y:780, deps:["c2_gibbon_matche"], desc:"Gibbon sur anneaux.", criteres:["À définir"], video:"" },
 
-        /* --- Branche balancier / sangles --- */
-        { id:"c2_balancier_bf",  type:"gear",   size:1.2,  icon:"🌀", titre:"Balancier barre fixe (niveau 2)", x:120, y:1030, deps:["c1_balancier"], desc:"Balancier de référence, ré-exigé au chapitre 2 comme base des sangles.", criteres:["À définir"], video:"" },
+        /* --- Branche balancier / sangles ---
+           "c1_balancier_ch2" est repris automatiquement du Chapitre 1 : il
+           se valide seul dès que le point clé d'origine l'est, et sert de
+           point de départ visible à cette branche. */
+        { id:"c1_balancier_ch2", type:"gear", size:1.2, icon:"🌀", titre:"Balancier sur barre fixe", x:-180, y:1030, deps:[], carryFrom:"c1_balancier", desc:"Reprise automatique du Chapitre 1 : ce point clé est déjà acquis, il sert de socle à cette branche du Chapitre 2.", criteres:[], video:"" },
+        { id:"c2_balancier_bf",  type:"gear",   size:1.2,  icon:"🌀", titre:"Balancier barre fixe (niveau 2)", x:120, y:1030, deps:["c1_balancier_ch2"], desc:"Balancier de référence, ré-exigé au chapitre 2 comme base des sangles.", criteres:["À définir"], video:"" },
         { id:"c2_balancier_sangle", type:"square", size:1.05, icon:"🪢", titre:"Balancier sur sangle avec élan de base", x:420, y:1030, deps:["c2_balancier_bf"], desc:"Reproduire le balancier sur une sangle suspendue.", criteres:["À définir"], video:"" },
         { id:"c2_balancier_pm",  type:"circle", size:0.9, icon:"🪢", titre:"Balancier sur sangle point mort", x:470, y:1230, deps:["c2_balancier_sangle"], desc:"Balancier sur sangle en partant à l'arrêt, sans élan.", criteres:["À définir"], video:"" },
         { id:"c2_balancier_cote",type:"square", size:0.95, icon:"↔", titre:"Balancier de côté", x:640, y:900, deps:["c2_balancier_sangle"], desc:"Balancier latéral.", criteres:["À définir"], video:"" },
