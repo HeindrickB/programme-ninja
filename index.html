@@ -601,7 +601,7 @@ function render(){
       const src = ALL[q.carryFrom];
       const srcCh = src && chapter(src._ch);
       const tag = el("text",{class:"carrytag", y:-r-11, "font-size":"11"});
-      tag.textContent = "↩ repris" + (srcCh ? (srcCh.numero ? " Ch." + srcCh.numero : " " + srcCh.titre) : "");
+      tag.textContent = "↩ repris" + (srcCh ? (srcCh.numero != null ? " Ch." + srcCh.numero : " " + srcCh.titre) : "");
       g.appendChild(tag);
     }
 
@@ -662,7 +662,7 @@ function updateProgress(){
 
 function updateChrome(){
   const ch = chapter(chapId);
-  $("#chapTitle b").textContent = (ch.numero ? "Chapitre " + ch.numero + " — " : "") + ch.titre;
+  $("#chapTitle b").textContent = (ch.numero != null ? "Chapitre " + ch.numero + " — " : "") + ch.titre;
   $("#chapTitle span").textContent = ch.sousTitre || "";
 }
 /* ------------------------------------------------------- PAN / ZOOM */
@@ -1089,7 +1089,7 @@ function renderChapters(){
     const b = document.createElement("div");
     b.className = "chapItem" + (ch.id === chapId ? " active" : "") + (unlocked ? "" : " lockedCh");
     b.innerHTML = `
-      <div class="ct">${ch.annexe ? "📎" : (ch.numero ? "Ch." + ch.numero : "")} ${escapeHtml(ch.titre)}
+      <div class="ct">${ch.annexe ? "📎" : (ch.numero != null ? "Ch." + ch.numero : "")} ${escapeHtml(ch.titre)}
         ${unlocked ? "" : '<span class="badge lock">🔒 aperçu</span>'}
         ${ch.brouillon ? '<span class="badge">brouillon</span>' : ''}</div>
       <div class="cs">${escapeHtml(ch.sousTitre||"")}</div>
@@ -1137,20 +1137,31 @@ function moveChapter(id, dir){
   const j = i + dir;
   if(i < 0 || j < 0 || j >= arr.length){ undoStack.pop(); updateUndoBtn(); return; }
   [arr[i], arr[j]] = [arr[j], arr[i]];
-  renumberChapters();
   persistProgramme(); renderChapters();
 }
-function renumberChapters(){
-  let n = 1;
-  PROG.chapitres.forEach(c => { if(!c.annexe) c.numero = n++; });
-}
 
+/* Le numéro affiché ("Ch.3", "Chapitre 3"...) est désormais un champ libre,
+   saisi par le gérant — il n'est plus recalculé automatiquement à chaque
+   réordonnancement. Ça permet d'avoir un "Chapitre 0", de sauter des numéros,
+   ou de marquer un chapitre comme annexe (numero: null, pas de préfixe "Ch."). */
+function promptNumero(current){
+  const txt = prompt(
+    "Numéro à afficher pour ce chapitre (ex : 0, 1, 2… — laisse vide pour une annexe sans numéro) :",
+    current);
+  if(txt === null) return null;               // annulé
+  const trimmed = txt.trim();
+  const parsed = trimmed === "" ? NaN : parseInt(trimmed, 10);
+  const isAnnexe = trimmed === "" || isNaN(parsed);
+  return { ok:true, numero: isAnnexe ? null : parsed, annexe: isAnnexe };
+}
 function createChapter(){
   const titre = prompt("Titre du nouveau chapitre :"); if(!titre) return;
+  const numeros = PROG.chapitres.filter(c => !c.annexe && c.numero != null).map(c => c.numero);
+  const suggestion = numeros.length ? String(Math.max(...numeros)+1) : "1";
+  const num = promptNumero(suggestion); if(!num) return;
   snapshot();
-  const numeros = PROG.chapitres.filter(c => !c.annexe && c.numero).map(c => c.numero);
   const id = "ch_" + Date.now().toString(36);
-  PROG.chapitres.push({ id, numero: numeros.length ? Math.max(...numeros)+1 : 1,
+  PROG.chapitres.push({ id, numero: num.numero, annexe: num.annexe,
                          titre, sousTitre:"", requis:[], quetes:[] });
   persistProgramme(); renderChapters();
   toast("Chapitre créé — ouvre « + Quête » depuis ce chapitre pour le remplir");
@@ -1159,6 +1170,7 @@ function editChapter(id){
   const ch = chapter(id); if(!ch) return;
   const titre = prompt("Titre du chapitre :", ch.titre); if(titre === null) return;
   const sousTitre = prompt("Sous-titre :", ch.sousTitre||""); if(sousTitre === null) return;
+  const num = promptNumero(ch.annexe || ch.numero == null ? "" : String(ch.numero)); if(!num) return;
   const reqTxt = prompt(
     "Id(s) de quête requise pour débloquer ce chapitre, séparés par une virgule (laisser vide = toujours accessible) :",
     (ch.requis||[]).join(", "));
@@ -1166,6 +1178,7 @@ function editChapter(id){
   snapshot();
   ch.titre = titre.trim() || ch.titre;
   ch.sousTitre = sousTitre.trim();
+  ch.numero = num.numero; ch.annexe = num.annexe;
   ch.requis = reqTxt.split(",").map(s=>s.trim()).filter(Boolean);
   persistProgramme(); renderChapters(); if(id===chapId) updateChrome();
   toast("Chapitre mis à jour");
@@ -1359,6 +1372,7 @@ function adminForm(q){
   <select class="f" id="aLiens" multiple size="4">${optsL}</select>
   <div class="sheetActions" style="margin-top:14px">
     <button class="btn primary" id="aSave">Enregistrer</button>
+    <button class="btn ghost"   id="aDup">⧉ Dupliquer cette quête</button>
     <button class="btn danger"  id="aDel">Supprimer cette quête</button>
   </div>
   <div class="sheetActions">
@@ -1406,6 +1420,19 @@ function wireAdminForm(q){
     q.liens = Array.from($("#aLiens").selectedOptions).map(o => o.value)
                    .filter(id => !q.deps.includes(id));
     persistProgramme(); render(); closeSheet(); toast("Quête enregistrée");
+  };
+  $("#aDup").onclick = () => {
+    snapshot();
+    const ch = chapter(chapId);
+    const id = ch.id + "_" + Date.now().toString(36);
+    const copy = JSON.parse(JSON.stringify(q));
+    copy.id = id;
+    copy.x = Math.round((q.x||0) + 70);
+    copy.y = Math.round((q.y||0) + 70);
+    ch.quetes.push(copy);
+    persistProgramme(); render(); closeSheet();
+    setTimeout(() => openQuest(id), 0);
+    toast("Quête dupliquée juste à côté — modifie-la puis repositionne-la avec « Déplacer »");
   };
   $("#aDel").onclick = () => {
     if(!confirm("Supprimer « " + q.titre + " » ? Les flèches et prérequis de chapitre qui y mènent seront retirés.")) return;
