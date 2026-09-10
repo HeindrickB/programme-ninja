@@ -73,6 +73,7 @@ svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
   background:#1c2320d9;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
   color:var(--text);font-size:19px;box-shadow:0 4px 14px #0006}
 .iconbtn:active{transform:scale(.94)}
+.iconbtn:disabled{opacity:.32;pointer-events:none}
 #chapTitle{pointer-events:none;flex:1;min-width:0}
 #chapTitle b{display:block;font-size:15px;line-height:1.2;text-shadow:0 2px 6px #000a;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -201,6 +202,7 @@ textarea.f{min-height:80px;resize:vertical}
   <div id="topbar">
     <button class="iconbtn" id="btnMenu" aria-label="Chapitres">☰</button>
     <div id="chapTitle"><b>—</b><span>—</span></div>
+    <button class="iconbtn" id="btnUndo" aria-label="Annuler la dernière action" disabled>↩️</button>
     <button class="iconbtn" id="btnFit" aria-label="Recentrer">⊹</button>
   </div>
   <div id="progressWrap"><div id="progressBar"></div></div>
@@ -263,6 +265,7 @@ const DEFAULT_THEME = {
 };
 const DEFAULT_SOUND = {
   quest:null, gear:null,               // data URI d'un son perso, ou null = synthétisé
+  click:null, chapter:null,            // idem — null = son par défaut (enregistré / synthétisé)
   ambient:null, ambientOn:false, ambientVolume:0.35
 };
 
@@ -319,6 +322,52 @@ let   moveMode = false;
 let   linkMode = false;
 let   linkSource = null;
 
+/* ------------------------------------------------------- ANNULER (undo)
+   Pile d'instantanés (programme + progression) pris juste AVANT chaque
+   action qui modifie l'état. "Annuler" dépile le dernier et restaure tout.
+   Jusqu'à 10 actions en arrière (clique plusieurs fois pour remonter plus). */
+const UNDO_MAX = 10;
+let undoStack = [];
+/* capture l'état actuel sans le poser sur la pile — utile quand on ne sait
+   pas encore, au moment de capturer, si l'action ira au bout (ex : un glisser
+   de nœud qu'on annule en le relâchant sans bouger) */
+function takeSnapshot(){
+  try{
+    return {
+      chapitres: JSON.parse(JSON.stringify(PROG.chapitres)),
+      titre: PROG.titre,
+      done: JSON.parse(JSON.stringify(prog.done || {}))
+    };
+  }catch(e){ return null; }
+}
+function pushSnapshot(snap){
+  if(!snap) return;
+  undoStack.push(snap);
+  if(undoStack.length > UNDO_MAX) undoStack.shift();
+  updateUndoBtn();
+}
+/* prend et pose l'instantané en une fois — pour toute action qui modifie
+   l'état immédiatement et complètement (pas de geste en plusieurs étapes) */
+function snapshot(){ pushSnapshot(takeSnapshot()); }
+function updateUndoBtn(){
+  const b = $("#btnUndo");
+  if(b) b.disabled = undoStack.length === 0;
+}
+function undo(){
+  if(!undoStack.length){ toast("Rien à annuler"); return; }
+  const snap = undoStack.pop();
+  PROG.chapitres = snap.chapitres;
+  PROG.titre = snap.titre;
+  prog.done = snap.done;
+  Store.saveProgramme(PROG);
+  Store.saveProgression(prog);
+  reindex();
+  if(!chapter(chapId)) chapId = PROG.chapitres[0].id;
+  render(); renderChapters(); closeSheet(); updateUndoBtn();
+  if(navigator.vibrate) navigator.vibrate(15);
+  toast(undoStack.length ? "Action annulée — " + undoStack.length + " de plus possible" : "Action annulée");
+}
+
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
@@ -355,15 +404,22 @@ function stateOf(q){
 function chapUnlocked(ch){ return (ch.requis||[]).every(isDone); }
 
 /* Chemin manquant : toutes les quêtes non validées en amont d'une cible.
-   On remonte les flèches bloquantes ET les flèches optionnelles, pour que
-   l'utilisateur voie tout ce qui mène à la quête visée.                   */
+   On remonte les flèches bloquantes ET les flèches optionnelles pour ne
+   rien manquer, mais on n'allume en surbrillance que les quêtes OBLIGATOIRES
+   (rond = bonus optionnel, jamais mis en avant) — un rond optionnel peut
+   quand même être traversé si un engrenage obligatoire se trouve derrière.  */
 function missingPath(qid){
   const nodes = new Set(), edges = new Set(), seen = new Set();
   (function walk(id){
     if(seen.has(id)) return; seen.add(id);
     const q = ALL[id]; if(!q) return;
     incoming(q).forEach(d => {
-      if(!isDone(d)){ nodes.add(d); edges.add(d + "→" + id); walk(d); }
+      if(!isDone(d)){
+        const dq = ALL[d];
+        const optionnel = dq && dq.type === "circle";
+        if(!optionnel){ nodes.add(d); edges.add(d + "→" + id); }
+        walk(d);
+      }
     });
   })(qid);
   return {nodes, edges};
@@ -677,7 +733,7 @@ stage.addEventListener("pointerdown", e => {
 
     if(pressedId && admin && moveMode){
       const q = ALL[pressedId];
-      dragNode = {id:pressedId, ox:q.x, oy:q.y, sx:e.clientX, sy:e.clientY};
+      dragNode = {id:pressedId, ox:q.x, oy:q.y, sx:e.clientX, sy:e.clientY, snap: takeSnapshot()};
     } else if(pressedId && stateOf(ALL[pressedId]) === "locked"){
       // appui long : seulement utile sur une quête encore verrouillée
       pressTimer = setTimeout(() => showPath(pressedId), 420);
@@ -730,13 +786,14 @@ function endPointer(e){
   stage.classList.remove("dragging");
 
   if(dragNode){
-    if(moved){ persistProgramme(); toast("Position enregistrée"); }
+    if(moved){ pushSnapshot(dragNode.snap); persistProgramme(); toast("Position enregistrée"); }
     dragNode = null; panStart = null; pressedId = null; return;
   }
   if(hlActive){ clearPath(); pressedId = null; panStart = null; pinchStart = null; return; }
 
   if(pointers.size === 0){
     if(!moved && pressedId){
+      sfxClick();
       if(admin && linkMode) handleLinkTap(pressedId);
       else openQuest(pressedId);
     }
@@ -786,6 +843,11 @@ function clearPath(){
   }
 }
 
+/* Son de clic léger par défaut : enregistrement fourni par l'utilisateur
+   (recadré/normalisé), pas un fichier extrait d'un jeu — cf. note plus bas
+   sur les sons FTB Quests/Minecraft qui restent protégés et absents d'ici. */
+const CLICK_SND_DEFAULT = "data:audio/wav;base64,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";
+
 /* ------------------------------------------------------------- SONS
    Par défaut : synthétisés (aucun fichier, aucun droit d'auteur — les
    sons d'origine FTB Quests/Minecraft sont protégés et ne peuvent pas
@@ -801,7 +863,23 @@ function tone(freq, t0, dur, type, gain){
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.05);
 }
-function playCustom(src){ try{ const a = new Audio(src); a.volume = 0.85; a.play().catch(()=>{}); }catch(e){} }
+/* courte salve de bruit filtré (façon "crash" de cymbale) — utilisée
+   uniquement par le son de chapitre terminé, pour lui donner du corps. */
+function noiseBurst(t0, dur, gain, freq){
+  const ac = audio();
+  const buf = ac.createBuffer(1, Math.ceil(ac.sampleRate*dur), ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+  const src = ac.createBufferSource(); src.buffer = buf;
+  const f = ac.createBiquadFilter(); f.type = "highpass"; f.frequency.value = freq || 3200;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain, t0 + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f).connect(g).connect(ac.destination);
+  src.start(t0); src.stop(t0 + dur + 0.05);
+}
+function playCustom(src, vol){ try{ const a = new Audio(src); a.volume = vol ?? 0.85; a.play().catch(()=>{}); }catch(e){} }
 function sfxQuest(){
   if(!prefs.sound) return;
   if(SOUND.quest) return playCustom(SOUND.quest);
@@ -816,6 +894,31 @@ function sfxGear(){
   [[1568,0.5],[2093,0.62]].forEach(([f,d]) => tone(f, t+d, 1.3, "sine", 0.11));
   tone(261.6, t, 1.9, "sine", 0.14);
   tone(392,   t+0.33, 1.6, "sine", 0.1);
+}
+/* petit clic très léger à chaque fois qu'on touche une icône de quête
+   (façon FTB Quests) — par défaut c'est l'enregistrement fourni par
+   l'utilisateur (recadré), pas une synthèse. */
+function sfxClick(){
+  if(!prefs.sound) return;
+  playCustom(SOUND.click || CLICK_SND_DEFAULT, 0.55);
+}
+/* fanfare puissante et épique jouée une fois quand TOUTES les quêtes
+   d'un chapitre viennent d'être validées : impact grave + crash, montée
+   en arpège, accord final tenu et brillant, écho de cloche aiguë. */
+function sfxChapterComplete(){
+  if(!prefs.sound) return;
+  if(SOUND.chapter) return playCustom(SOUND.chapter);
+  const t = audio().currentTime;
+  tone(98,  t, 1.1, "sawtooth", 0.22);
+  tone(196, t, 0.9, "sawtooth", 0.16);
+  noiseBurst(t, 0.5, 0.32);
+  [[523.25,0.06],[659.25,0.14],[783.99,0.22],[1046.5,0.32]]
+    .forEach(([f,d]) => tone(f, t+d, 0.55, "sawtooth", 0.17));
+  [[523.25,0.5],[659.25,0.5],[783.99,0.5],[1046.5,0.5],[1568,0.55]]
+    .forEach(([f,d]) => tone(f, t+d, 1.7, "triangle", 0.13));
+  [[2093,0.55],[2093,0.85],[2093,1.15]]
+    .forEach(([f,d],i) => tone(f, t+d, 0.6, "sine", 0.09*(1-i*0.25)));
+  if(navigator.vibrate) navigator.vibrate([30,60,30,60,120]);
 }
 
 /* ambiance sonore en boucle, facultative */
@@ -914,6 +1017,10 @@ function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c =>
 
 function validate(id){
   const q = ALL[id]; if(!q || q.carryFrom || !isAvailable(q)) return;
+  snapshot();
+  // pour détecter si CETTE validation vient de compléter tout le chapitre
+  const ch = chapter(q._ch);
+  const chWasComplete = ch ? ch.quetes.every(x => isDone(x.id)) : false;
   prog.done[id] = new Date().toISOString();
   Store.saveProgression(prog);
   paint();
@@ -921,10 +1028,14 @@ function validate(id){
   if(g){ g.classList.add("pulse"); setTimeout(()=>g.classList.remove("pulse"), 520); }
   if(q.type === "gear"){ sfxGear(); if(navigator.vibrate) navigator.vibrate([25,60,25,60,45]); }
   else                 { sfxQuest(); if(navigator.vibrate) navigator.vibrate(22); }
+  const chNowComplete = ch && !chWasComplete && ch.quetes.every(x => isDone(x.id));
+  if(chNowComplete) setTimeout(sfxChapterComplete, 320);   // laisse le "ding" jouer avant la fanfare
   closeSheet();
   renderChapters();
 
-  if(q.type === "gear"){
+  if(chNowComplete){
+    toast("🏆 Chapitre « " + ch.titre + " » terminé !");
+  } else if(q.type === "gear"){
     const next = PROG.chapitres.find(c => (c.requis||[]).includes(id) && chapUnlocked(c));
     toast(next ? "★ Point clé validé — « " + next.titre + " » est débloqué !"
                : "★ Point clé validé !");
@@ -936,6 +1047,7 @@ function validate(id){
 }
 
 function unvalidate(id){
+  snapshot();
   // Annuler une reprise (carryFrom) annule en réalité la quête d'origine —
   // c'est elle qui porte la validation.
   const q0 = ALL[id];
@@ -964,11 +1076,13 @@ const drawer = $("#drawer"), scrim = $("#scrim");
 function openDrawer(){ drawer.classList.add("open"); scrim.classList.add("open"); renderChapters(); }
 function closeDrawer(){ drawer.classList.remove("open"); scrim.classList.remove("open"); }
 $("#btnMenu").onclick = openDrawer;
+$("#btnUndo").onclick = undo;
 scrim.onclick = () => { closeDrawer(); closeSheet(); };
 
 function renderChapters(){
   const list = $("#chapList"); list.innerHTML = "";
-  PROG.chapitres.forEach(ch => {
+  const arr = PROG.chapitres;
+  arr.forEach((ch, idx) => {
     const unlocked = chapUnlocked(ch);
     const tot = ch.quetes.length || 1;
     const n = ch.quetes.filter(q => isDone(q.id)).length;
@@ -981,13 +1095,18 @@ function renderChapters(){
       <div class="cs">${escapeHtml(ch.sousTitre||"")}</div>
       <div class="bar"><i style="width:${(n/tot*100).toFixed(0)}%"></i></div>
       ${ admin ? `<div class="adminRow">
+            <button class="miniBtn" data-act="up"   ${idx===0            ? "disabled" : ""}>⬆️ Monter</button>
+            <button class="miniBtn" data-act="down" ${idx===arr.length-1 ? "disabled" : ""}>⬇️ Descendre</button>
             <button class="miniBtn" data-act="edit">✏️ Renommer / requis</button>
             <button class="miniBtn danger" data-act="del">🗑 Supprimer</button>
           </div>` : "" }`;
     b.onclick = (e) => {
       const act = e.target.closest("[data-act]");
       if(act){ e.stopPropagation();
-        if(act.dataset.act === "edit") editChapter(ch.id);
+        if(act.disabled) return;
+        if(act.dataset.act === "up") moveChapter(ch.id, -1);
+        else if(act.dataset.act === "down") moveChapter(ch.id, 1);
+        else if(act.dataset.act === "edit") editChapter(ch.id);
         else deleteChapter(ch.id);
         return;
       }
@@ -1006,8 +1125,29 @@ function renderChapters(){
   }
 }
 
+/* Réordonner les chapitres (ex : faire passer un nouveau "chapitre 0" avant
+   le chapitre 1). On déplace simplement l'élément dans le tableau — c'est cet
+   ordre qui pilote l'affichage — puis on renumérote les "numero" 1,2,3...
+   des chapitres normaux (les annexes gardent numero:null, quelle que soit
+   leur position). */
+function moveChapter(id, dir){
+  snapshot();
+  const arr = PROG.chapitres;
+  const i = arr.findIndex(c => c.id === id);
+  const j = i + dir;
+  if(i < 0 || j < 0 || j >= arr.length){ undoStack.pop(); updateUndoBtn(); return; }
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  renumberChapters();
+  persistProgramme(); renderChapters();
+}
+function renumberChapters(){
+  let n = 1;
+  PROG.chapitres.forEach(c => { if(!c.annexe) c.numero = n++; });
+}
+
 function createChapter(){
   const titre = prompt("Titre du nouveau chapitre :"); if(!titre) return;
+  snapshot();
   const numeros = PROG.chapitres.filter(c => !c.annexe && c.numero).map(c => c.numero);
   const id = "ch_" + Date.now().toString(36);
   PROG.chapitres.push({ id, numero: numeros.length ? Math.max(...numeros)+1 : 1,
@@ -1023,6 +1163,7 @@ function editChapter(id){
     "Id(s) de quête requise pour débloquer ce chapitre, séparés par une virgule (laisser vide = toujours accessible) :",
     (ch.requis||[]).join(", "));
   if(reqTxt === null) return;
+  snapshot();
   ch.titre = titre.trim() || ch.titre;
   ch.sousTitre = sousTitre.trim();
   ch.requis = reqTxt.split(",").map(s=>s.trim()).filter(Boolean);
@@ -1033,6 +1174,7 @@ function deleteChapter(id){
   if(PROG.chapitres.length <= 1){ toast("Il doit rester au moins un chapitre"); return; }
   const ch = chapter(id); if(!ch) return;
   if(!confirm("Supprimer le chapitre « " + ch.titre + " » et toutes ses quêtes ?\nLes flèches et prérequis qui y menaient seront retirés.")) return;
+  snapshot();
   const ids = new Set(ch.quetes.map(q => q.id));
   PROG.chapitres = PROG.chapitres.filter(c => c.id !== id);
   PROG.chapitres.forEach(c => {
@@ -1057,6 +1199,7 @@ $("#btnSound").onclick = () => {
 };
 $("#btnReset").onclick = () => {
   if(!confirm("Effacer toute ta progression ? Le programme (quêtes, vidéos) n'est pas touché.")) return;
+  snapshot();
   prog = {done:{}}; Store.saveProgression(prog);
   paint(); renderChapters(); toast("Progression réinitialisée");
 };
@@ -1103,17 +1246,21 @@ function handleLinkTap(id){
     "Flèche de « " + from.titre + " » vers « " + to.titre + " ».\n\n" +
     "OK = BLOQUANTE (trait plein, obligatoire)\nAnnuler = choisir OPTIONNELLE"
   );
-  if(bloquant){
-    to.deps = (to.deps||[]).concat(fromId);
-  } else if(confirm("Créer une flèche OPTIONNELLE (pointillée, ne bloque jamais) ?")){
-    to.liens = (to.liens||[]).concat(fromId);
-  } else { toast("Liaison annulée"); return; }
+  let optionnelle = false;
+  if(!bloquant){
+    if(!confirm("Créer une flèche OPTIONNELLE (pointillée, ne bloque jamais) ?")){ toast("Liaison annulée"); return; }
+    optionnelle = true;
+  }
+  snapshot();
+  if(!optionnelle) to.deps = (to.deps||[]).concat(fromId);
+  else              to.liens = (to.liens||[]).concat(fromId);
   persistProgramme(); render(); toast("Flèche créée");
 }
 function removeLink(fromId, toId){
   const to = ALL[toId]; if(!to) return;
   const from = ALL[fromId];
   if(!confirm("Supprimer la flèche « " + (from?from.titre:fromId) + " » → « " + to.titre + " » ?")) return;
+  snapshot();
   to.deps  = (to.deps ||[]).filter(d => d !== fromId);
   to.liens = (to.liens||[]).filter(d => d !== fromId);
   persistProgramme(); render(); toast("Flèche supprimée");
@@ -1158,6 +1305,7 @@ $("#btnTheme").onclick = openApparence;
 $("#btnSounds").onclick = openSons;
 $("#btnAdd").onclick = () => {
   const titre = prompt("Titre de la nouvelle quête :"); if(!titre) return;
+  snapshot();
   const ch = chapter(chapId);
   const id = ch.id + "_" + Date.now().toString(36);
   const c = bounds();
@@ -1228,6 +1376,7 @@ function wireAdminForm(q){
   $("#aIconFile").onchange = () => {
     const f = $("#aIconFile").files[0]; if(!f) return;
     fileToDataUrl(f, url => {
+      snapshot();
       q.iconImg = url;
       persistProgramme();
       render();
@@ -1236,12 +1385,14 @@ function wireAdminForm(q){
     });
   };
   $("#aIconClear").onclick = () => {
+    snapshot();
     delete q.iconImg; persistProgramme(); render();
     const prev = $("#aIconPrev"); if(prev) prev.textContent = $("#aIcon").value || "•";
     toast("Image retirée");
   };
 
   $("#aSave").onclick = () => {
+    snapshot();
     q.titre = $("#aTitre").value.trim() || q.titre;
     q.type  = $("#aType").value;
     q.size  = parseFloat(sizeI.value);
@@ -1258,6 +1409,7 @@ function wireAdminForm(q){
   };
   $("#aDel").onclick = () => {
     if(!confirm("Supprimer « " + q.titre + " » ? Les flèches et prérequis de chapitre qui y mènent seront retirés.")) return;
+    snapshot();
     const ch = chapter(chapId);
     ch.quetes = ch.quetes.filter(o => o.id !== q.id);
     PROG.chapitres.forEach(c => {
@@ -1286,6 +1438,7 @@ function wireAdminForm(q){
         try{
           const o = JSON.parse(rd.result);
           if(!o.chapitres) throw 0;
+          snapshot();
           PROG.chapitres = o.chapitres; PROG.titre = o.titre || PROG.titre;
           persistProgramme();
           if(!chapter(chapId)) chapId = PROG.chapitres[0].id;
@@ -1383,11 +1536,11 @@ function fileToDataUrl(file, cb){
   rd.onerror = () => toast("Fichier illisible");
   rd.readAsDataURL(file);
 }
-function soundRow(id, label, current){
+function soundRow(id, label, current, defaultLabel){
   return `<div class="iconPreviewRow">
     <div class="stack">
       <span style="font-size:13.5px">${label}</span>
-      <small class="hint" style="margin:0">${current ? "Son personnalisé actif" : "Son synthétisé par défaut"}</small>
+      <small class="hint" style="margin:0">${current ? "Son personnalisé actif" : (defaultLabel || "Son synthétisé par défaut")}</small>
       <input class="f" id="${id}File" type="file" accept="audio/*">
       <div style="display:flex;gap:8px">
         <button class="miniBtn" id="${id}Test">▶ Écouter</button>
@@ -1407,6 +1560,12 @@ function openSons(){
 
     <div class="sectionTitle">Validation — engrenage</div>
     ${soundRow("sGear","Son de point clé", SOUND.gear)}
+
+    <div class="sectionTitle">Clic sur une icône</div>
+    ${soundRow("sClick","Petit clic léger", SOUND.click, "Son enregistré par défaut")}
+
+    <div class="sectionTitle">Chapitre terminé</div>
+    ${soundRow("sChapter","Fanfare quand tout un chapitre est validé", SOUND.chapter)}
 
     <div class="sectionTitle">Ambiance</div>
     <div class="swatchRow" style="align-items:center">
@@ -1437,6 +1596,16 @@ function openSons(){
     fileToDataUrl(f, url => { SOUND.gear = url; saveSoundOrWarn("Son de point clé enregistré"); openSons(); }); };
   $("#sGearTest").onclick = sfxGear;
   $("#sGearClear").onclick = () => { SOUND.gear = null; Store.saveSound(SOUND); toast("Retour au son par défaut"); openSons(); };
+
+  $("#sClickFile").onchange = () => { const f = $("#sClickFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => { SOUND.click = url; saveSoundOrWarn("Son de clic enregistré"); openSons(); }); };
+  $("#sClickTest").onclick = sfxClick;
+  $("#sClickClear").onclick = () => { SOUND.click = null; Store.saveSound(SOUND); toast("Retour au son par défaut"); openSons(); };
+
+  $("#sChapterFile").onchange = () => { const f = $("#sChapterFile").files[0]; if(!f) return;
+    fileToDataUrl(f, url => { SOUND.chapter = url; saveSoundOrWarn("Son de chapitre enregistré"); openSons(); }); };
+  $("#sChapterTest").onclick = sfxChapterComplete;
+  $("#sChapterClear").onclick = () => { SOUND.chapter = null; Store.saveSound(SOUND); toast("Retour au son par défaut"); openSons(); };
 
   $("#sAmbToggle").onclick = () => {
     SOUND.ambientOn = !SOUND.ambientOn; Store.saveSound(SOUND); applyAmbient(); openSons();
