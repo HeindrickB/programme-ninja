@@ -146,8 +146,8 @@ const PROGRAMME = {
           type: "square", size: 1, icon: "⏲",
           titre: "Timing",
           x: 630, y: 525,
-          deps: ["c1_montee_genou_deplie", "c1_talon_fesse"],
-          liens: [],
+          deps: ["c1_montee_genou_deplie"],
+          liens: ["c1_talon_fesse"],
           desc: "Synchroniser la montée de genou dépliée avec l'oscillation du corps. Sans timing, pas de balancier.",
           criteres: ["À définir"],
           video: ""
@@ -283,24 +283,26 @@ const PROGRAMME = {
         },
 
         /* --- Colonne des supports --- */
-        { id:"c2_reglettes",     type:"square", size:1, icon:"▤", titre:"Réglettes",        x: 1050, y: 60, deps: ["c2_grip_force"], desc:"Suspension sur réglettes (petites prises d'escalade).", criteres:["À définir"], video:"" },
-        { id:"c2_demi_sphere",   type:"square", size:1, icon:"◗", titre:"Demi-sphère",      x: 1050, y: 210, deps: ["c2_grip_force"], desc:"Suspension sur demi-sphères.", criteres:["À définir"], video:"" },
-        { id:"c2_barre_pivot",   type:"square", size:1, icon:"⟳", titre:"Barre pivotante",  x: 1050, y: 355, deps: ["c2_grip_force"], desc:"Suspension sur barre qui tourne librement.", criteres:["À définir"], video:"" },
-        { id:"c2_boules",        type:"square", size:1, icon:"⚫", titre:"Boules",           x: 1050, y: 500, deps: ["c2_grip_force"], desc:"Suspension sur boules suspendues.", criteres:["À définir"], video:"" },
-        { id:"c2_nunchaku",      type:"square", size:1, icon:"⌇", titre:"Nunchaku",         x: 1050, y: 650, deps: ["c2_grip_force"], desc:"Suspension sur nunchakus.", criteres:["À définir"], video:"" },
+        { id:"c2_reglettes",     type:"square", size:1, icon:"▤", titre:"Réglettes",        x: 1042, y: 159, deps: ["c2_grip_force"], desc:"Suspension sur réglettes (petites prises d'escalade).", criteres:["À définir"], video:"" },
+        { id:"c2_demi_sphere",   type:"square", size:1, icon:"◗", titre:"Demi-sphère",      x: 1041, y: 305, deps: ["c2_grip_force"], desc:"Suspension sur demi-sphères.", criteres:["À définir"], video:"" },
+        { id:"c2_barre_pivot",   type:"square", size:1, icon:"⟳", titre:"Barre pivotante",  x: 1042, y: 459, deps: ["c2_grip_force"], desc:"Suspension sur barre qui tourne librement.", criteres:["À définir"], video:"" },
+        { id:"c2_boules",        type:"square", size:1, icon:"⚫", titre:"Boules",           x: 1045, y: 611, deps: ["c2_grip_force"], desc:"Suspension sur boules suspendues.", criteres:["À définir"], video:"" },
+        { id:"c2_nunchaku",      type:"square", size:1, icon:"⌇", titre:"Nunchaku",         x: 1043, y: 751, deps: ["c2_grip_force"], desc:"Suspension sur nunchakus.", criteres:["À définir"], video:"" },
+        { id:"ch2_mtvdysge",     type:"square", size:1, icon:"⭐", titre:"Lock off 2 bras",  x: 1044, y: 9,   deps: ["c2_grip_force"], desc:"", criteres:[], video:"" },
+        { id:"ch2_mtvdzlog",     type:"square", size:1, icon:"⭐", titre:"Lock off 1 bras",  x: 1329, y: 11,  deps: ["ch2_mtvdysge"], desc:"", criteres:[], video:"" },
 
         /* --- Lâché regrab sur chaque support --- */
-        { id:"c2_lr_reglette",   type:"square", size:1, icon:"➡", titre:"Lâché regrab réglette",       x: 1330, y: 60, deps: ["c2_reglettes"],   desc:"Lâcher et attraper une réglette.", criteres:["À définir"], video:"" },
-        { id:"c2_lr_demi",       type:"square", size:1, icon:"➡", titre:"Lâché regrab demi-sphère",    x: 1330, y: 210, deps: ["c2_demi_sphere"], desc:"Lâcher et attraper une demi-sphère.", criteres:["À définir"], video:"" },
-        { id:"c2_lr_pivot",      type:"square", size:1, icon:"➡", titre:"Lâché regrab barre pivotante",x: 1330, y: 355, deps: ["c2_barre_pivot"], desc:"Lâcher et attraper une barre pivotante.", criteres:["À définir"], video:"" },
-        { id:"c2_lr_boules",     type:"square", size:1, icon:"➡", titre:"Lâché regrab boules",         x: 1330, y: 500, deps: ["c2_boules"],      desc:"Lâcher et attraper une boule.", criteres:["À définir"], video:"" },
-        { id:"c2_lr_nunchaku",   type:"square", size:1, icon:"➡", titre:"Lâché regrab nunchaku",       x: 1330, y: 650, deps: ["c2_nunchaku"],    desc:"Lâcher et attraper un nunchaku.", criteres:["À définir"], video:"" },
+        { id:"c2_lr_reglette",   type:"square", size:1, icon:"➡", titre:"Lâché regrab réglette",       x: 1328, y: 161, deps: ["c2_reglettes"],   desc:"Lâcher et attraper une réglette.", criteres:["À définir"], video:"" },
+        { id:"c2_lr_demi",       type:"square", size:1, icon:"➡", titre:"Lâché regrab demi-sphère",    x: 1327, y: 305, deps: ["c2_demi_sphere"], desc:"Lâcher et attraper une demi-sphère.", criteres:["À définir"], video:"" },
+        { id:"c2_lr_pivot",      type:"square", size:1, icon:"➡", titre:"Lâché regrab barre pivotante",x: 1327, y: 458, deps: ["c2_barre_pivot"], desc:"Lâcher et attraper une barre pivotante.", criteres:["À définir"], video:"" },
+        { id:"c2_lr_boules",     type:"square", size:1, icon:"➡", titre:"Lâché regrab boules",         x: 1328, y: 611, deps: ["c2_boules"],      desc:"Lâcher et attraper une boule.", criteres:["À définir"], video:"" },
+        { id:"c2_lr_nunchaku",   type:"square", size:1, icon:"➡", titre:"Lâché regrab nunchaku",       x: 1329, y: 751, deps: ["c2_nunchaku"],    desc:"Lâcher et attraper un nunchaku.", criteres:["À définir"], video:"" },
 
         /* --- Branche gibbon --- */
         { id:"c2_gibbon_matche", type:"square", size:1,    icon:"🐒", titre:"Gibbon matché",        x: 264, y: 646, deps: ["c1_balancier_ch2"], desc:"Déplacement en gibbon avec les deux mains sur la même prise.", criteres:["À définir"], video:"" },
         { id:"c2_gibbon_1bras",  type:"circle", size:0.95, icon:"🐒", titre:"Gibbon sur barre 1 bras", x: 74, y: 648, deps: ["c2_gibbon_matche"], desc:"Gibbon barre à barre à un seul bras.", criteres:["À définir"], video:"" },
-        { id:"c2_gibbon_boules", type:"circle", size:0.9,  icon:"⚫", titre:"Gibbon sur boules",    x: 492, y: 610, deps: ["c2_gibbon_matche", "c2_boules"],   desc:"Gibbon sur des boules.", criteres:["À définir"], video:"" },
-        { id:"c2_gibbon_nunch",  type:"circle", size:0.9,  icon:"⌇", titre:"Gibbon sur nunchaku",  x: 514, y: 778, deps: ["c2_gibbon_matche", "c2_nunchaku"], desc:"Gibbon sur nunchakus.", criteres:["À définir"], video:"" },
+        { id:"c2_gibbon_boules", type:"circle", size:0.9,  icon:"⚫", titre:"Gibbon sur boules",    x: 571, y: 611, deps: ["c2_gibbon_matche", "c2_boules"],   desc:"Gibbon sur des boules.", criteres:["À définir"], video:"" },
+        { id:"c2_gibbon_nunch",  type:"circle", size:0.9,  icon:"⌇", titre:"Gibbon sur nunchaku",  x: 570, y: 747, deps: ["c2_gibbon_matche", "c2_nunchaku"], desc:"Gibbon sur nunchakus.", criteres:["À définir"], video:"" },
         { id:"c2_gibbon_anneau", type:"circle", size:0.9,  icon:"⭕", titre:"Gibbon sur anneau",    x: 374, y: 868, deps: ["c2_gibbon_matche"], desc:"Gibbon sur anneaux.", criteres:["À définir"], video:"" },
 
         /* --- Branche balancier / sangles ---
@@ -325,7 +327,7 @@ const PROGRAMME = {
           type: "gear", size: 1.6, icon: "🥷",
           titre: "Fondamentaux acquis",
           x: 1882, y: 751,
-          deps: ["c2_lr_reglette", "c2_lr_demi", "c2_lr_pivot", "c2_lr_boules", "c2_lr_nunchaku", "c2_lr_cote_cote", "c2_lr_sangle", "c2_chgt_dir_2"],
+          deps: ["c2_lr_reglette", "c2_lr_demi", "c2_lr_pivot", "c2_lr_boules", "c2_lr_nunchaku", "c2_lr_cote_cote", "c2_lr_sangle", "c2_chgt_dir_2", "ch2_mtvdzlog"],
           desc: "POINT CLÉ. Tu maîtrises tous les supports et tous les types de lâché. Tu peux entrer sur un parcours de compétition sans être surpris par un obstacle.",
           criteres: ["Toutes les branches obligatoires du chapitre validées"],
           video: ""
@@ -343,6 +345,34 @@ const PROGRAMME = {
         { id:"c2_podium_3", type:"circle", size:0.85, icon:"🥉", titre:"Arriver 3ème",  x: 2055, y: 1297, deps: ["c2_premiere_compet"], desc:"Monter sur la 3ème marche d'une compétition.", criteres:["Podium confirmé"], video:"" },
         { id:"c2_podium_2", type:"circle", size:0.9,  icon:"🥈", titre:"Arriver 2ème",  x: 2054, y: 952, deps: ["c2_premiere_compet"], desc:"Monter sur la 2ème marche d'une compétition.", criteres:["Podium confirmé"], video:"" },
         { id:"c2_podium_1", type:"circle", size: 0.9,    icon:"🥇", titre:"Arriver 1er",   x: 2055, y: 1122, deps: ["c2_premiere_compet"], desc:"Gagner une compétition.", criteres:["Victoire confirmée"], video:"" }
+      ]
+    },
+
+    /* ==========================================================
+       CHAPITRE 4 — LE TECHNICIEN
+       ========================================================== */
+    {
+      id: "ch_mtvv70mg",
+      numero: 4,
+      titre: "Chapitre 4 : Le technicien",
+      sousTitre: "",
+      requis: [],
+      quetes: [
+        /* Point clé repris automatiquement du Chapitre 2 — se valide tout
+           seul dès que "c2_fondamentaux" est validé. */
+        {
+          id: "ch_mtvv70mg_mtvvbghn",
+          type: "gear", size: 1.5, icon: "⭐",
+          titre: "Fondamentaux acquis",
+          x: 651, y: 658,
+          deps: [],
+          carryFrom: "c2_fondamentaux",
+          desc: "",
+          criteres: [],
+          video: ""
+        },
+        { id:"ch_mtvv70mg_mtvve8e4", type:"square", size:1.3, icon:"⭐", titre:"Tech objets", x: 373, y: 365, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres:[], video:"" },
+        { id:"ch_mtvv70mg_mtvvg8rd", type:"square", size:1,   icon:"⭐", titre:"Anneaux",     x: 102, y: 595, deps: [], desc:"", criteres:[], video:"" }
       ]
     }
   ]
