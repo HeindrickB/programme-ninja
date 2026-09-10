@@ -26,11 +26,23 @@ const PROGRAMME = {
   chapitres: [
 
     /* ==========================================================
+       CHAPITRE 0 — INFORMATIONS IMPORTANTES
+       ========================================================== */
+    {
+      id: "ch_mtv49t3o",
+      numero: 1,
+      titre: "Informations importantes",
+      sousTitre: "",
+      requis: [],
+      quetes: []
+    },
+
+    /* ==========================================================
        CHAPITRE 1 — LES BASES
        ========================================================== */
     {
       id: "ch1",
-      numero: 1,
+      numero: 2,
       titre: "Les bases",
       sousTitre: "Du grip zéro au lâché regrab barre à barre",
       requis: [],                 // toujours accessible
@@ -41,7 +53,7 @@ const PROGRAMME = {
           id: "c1_dead_hang",
           type: "square", size: 1, icon: "⏱",
           titre: "20 secondes de dead hang",
-          x: -76, y: 327,
+          x: 205, y: 121,
           deps: [],
           desc: "Suspension passive sur barre fixe, bras tendus, épaules relâchées puis engagées. C'est le tout premier test d'endurance de la main.",
           criteres: ["À définir"],
@@ -51,7 +63,7 @@ const PROGRAMME = {
           id: "c1_changement_prise",
           type: "square", size: 1, icon: "🔄",
           titre: "Changement de prise",
-          x: -75, y: 111,
+          x: 462, y: 120,
           deps: [],
           desc: "Passer de pronation à supination (et inversement) en suspension, une main après l'autre, sans poser les pieds.",
           criteres: ["À définir"],
@@ -61,7 +73,7 @@ const PROGRAMME = {
           id: "c1_traction_australienne",
           type: "square", size: 0.9, icon: "🧗",
           titre: "Traction australienne stricte",
-          x: -74, y: 604,
+          x: 334, y: 740,
           deps: [],
           desc: "Traction horizontale corps gainé, barre basse. La porte d'entrée avant la vraie traction.",
           criteres: ["À définir"],
@@ -69,9 +81,9 @@ const PROGRAMME = {
         },
         {
           id: "c1_demi_traction",
-          type: "square", size: 0.95, icon: "💪",
+          type: "square", size: 0.9, icon: "💪",
           titre: "Demi-traction avec kipping",
-          x: 110, y: 468,
+          x: 333, y: 542,
           deps: ["c1_traction_australienne"],
           desc: "Traction partielle avec élan des jambes : on cherche à casser l'angle des bras et à monter le menton vers la barre.",
           criteres: ["À définir"],
@@ -81,7 +93,7 @@ const PROGRAMME = {
           id: "c1_traction_complete",
           type: "circle", size: 0.85, icon: "🏅",
           titre: "Traction complète stricte",
-          x: 283, y: 570,
+          x: 167, y: 541,
           deps: ["c1_demi_traction"],
           desc: "Bonus très rentable : la traction stricte, sans élan. Elle accélère énormément tout le reste du programme.",
           criteres: ["À définir"],
@@ -237,7 +249,7 @@ const PROGRAMME = {
        ========================================================== */
     {
       id: "ch2",
-      numero: 2,
+      numero: 3,
       titre: "Ça commence à devenir sérieux",
       sousTitre: "Prises variées, gibbon, sangles et première compétition",
       requis: ["c1_lache_regrab"],
@@ -332,18 +344,6 @@ const PROGRAMME = {
         { id:"c2_podium_2", type:"circle", size:0.9,  icon:"🥈", titre:"Arriver 2ème",  x: 2054, y: 952, deps: ["c2_premiere_compet"], desc:"Monter sur la 2ème marche d'une compétition.", criteres:["Podium confirmé"], video:"" },
         { id:"c2_podium_1", type:"circle", size: 0.9,    icon:"🥇", titre:"Arriver 1er",   x: 2055, y: 1122, deps: ["c2_premiere_compet"], desc:"Gagner une compétition.", criteres:["Victoire confirmée"], video:"" }
       ]
-    },
-
-    /* ==========================================================
-       CHAPITRE 0 — BROUILLON (créé depuis le mode gérant)
-       ========================================================== */
-    {
-      id: "ch_mtv49t3o",
-      numero: 3,
-      titre: "Ch.0 Informations importantes ",
-      sousTitre: "",
-      requis: [],
-      quetes: []
     }
   ]
 };
