@@ -1335,6 +1335,11 @@ function adminForm(q){
     .map(o => `<option value="${o.id}" ${(q.deps||[]).includes(o.id)?"selected":""}>${escapeHtml(o.titre)}</option>`).join("");
   const optsL = ch.quetes.filter(o => o.id !== q.id)
     .map(o => `<option value="${o.id}" ${(q.liens||[]).includes(o.id)?"selected":""}>${escapeHtml(o.titre)}</option>`).join("");
+  const carryGroups = PROG.chapitres.filter(c => c.id !== ch.id).map(c => {
+    const label = c.annexe ? c.titre : (c.numero != null ? `Chapitre ${c.numero} — ${c.titre}` : c.titre);
+    const options = c.quetes.map(o => `<option value="${o.id}" ${q.carryFrom===o.id?"selected":""}>${escapeHtml(o.titre)}</option>`).join("");
+    return options ? `<optgroup label="${escapeHtml(label)}">${options}</optgroup>` : "";
+  }).join("");
   return `
   <hr style="border:0;border-top:1px solid #ffffff18;margin:20px 0 4px">
   <label class="f">🔧 Gérant — titre</label>
@@ -1359,9 +1364,12 @@ function adminForm(q){
   </div>
   <label class="f">Lien vidéo (YouTube, Vimeo ou .mp4)</label>
   <input class="f" id="aVideo" placeholder="https://youtu.be/..." value="${escapeHtml(q.video||"")}">
-  <label class="f">↩ Reprise automatique — id d'une quête d'un chapitre précédent (laisser vide sinon).
+  <label class="f">↩ Reprise automatique — reprend une quête d'un autre chapitre (laisse sur « Aucune » sinon).
     Cette quête sera alors validée automatiquement dès que l'originale le sera, et ne pourra plus être validée à la main.</label>
-  <input class="f" id="aCarryFrom" placeholder="ex : c1_balancier" value="${escapeHtml(q.carryFrom||"")}">
+  <select class="f" id="aCarryFrom">
+    <option value="">— Aucune —</option>
+    ${carryGroups}
+  </select>
   <label class="f">Description</label>
   <textarea class="f" id="aDesc">${escapeHtml(q.desc||"")}</textarea>
   <label class="f">Critères de validation (un par ligne)</label>
@@ -1412,7 +1420,7 @@ function wireAdminForm(q){
     q.size  = parseFloat(sizeI.value);
     q.icon  = $("#aIcon").value.trim() || "•";
     q.video = $("#aVideo").value.trim();
-    const cf = $("#aCarryFrom").value.trim();
+    const cf = $("#aCarryFrom").value;
     if(cf) q.carryFrom = cf; else delete q.carryFrom;
     q.desc  = $("#aDesc").value.trim();
     q.criteres = $("#aCrit").value.split("\n").map(s=>s.trim()).filter(Boolean);
