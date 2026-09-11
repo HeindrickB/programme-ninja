@@ -217,6 +217,7 @@ textarea.f{min-height:80px;resize:vertical}
     <button id="btnMove">Déplacer : off</button>
     <button id="btnLink">🔗 Lier : off</button>
     <button id="btnAdd">+ Quête</button>
+    <button id="btnAddGear">🔗 + Engrenage repris</button>
     <button id="btnTheme">🎨 Apparence</button>
     <button id="btnSounds">🔊 Sons</button>
     <button id="btnExitAdmin">Quitter</button>
@@ -972,7 +973,7 @@ function openQuest(id){
     const src = ALL[q.carryFrom];
     const srcTitre = src ? src.titre : q.carryFrom;
     const srcCh = src && chapter(src._ch);
-    const srcLabel = srcCh ? (srcCh.numero ? "chapitre " + srcCh.numero : srcCh.titre) : "un chapitre précédent";
+    const srcLabel = srcCh ? (srcCh.numero != null ? "chapitre " + srcCh.numero : srcCh.titre) : "un chapitre précédent";
     blocked = (st === "done")
       ? `<div class="reqline">↩ <b>Reprise automatique.</b> Déjà validée via « ${escapeHtml(srcTitre)} » (${escapeHtml(srcLabel)}).</div>`
       : `<div class="reqline">↩ <b>Reprise automatique.</b> Se validera toute seule dès que « ${escapeHtml(srcTitre)} » sera validée (${escapeHtml(srcLabel)}).</div>`;
@@ -1328,6 +1329,65 @@ $("#btnAdd").onclick = () => {
   persistProgramme(); render(); openQuest(id);
   toast("Quête créée — remplis sa fiche, puis place-la avec « Déplacer »");
 };
+
+/* Menu déroulant des engrenages (points clés) déjà présents dans les AUTRES
+   chapitres, pour "faire démarrer" ce chapitre-ci par un point clé déjà
+   acquis ailleurs — les deux quêtes restent connectées via carryFrom : dès
+   que l'originale est validée, la copie l'est automatiquement aussi. On
+   exclut les engrenages qui sont eux-mêmes déjà une reprise (ils n'ont pas
+   de validation propre à chaîner). */
+function gearOptionsHtml(excludeChapterId, selectedId){
+  return PROG.chapitres.filter(c => c.id !== excludeChapterId).map(c => {
+    const gears = c.quetes.filter(q => q.type === "gear" && !q.carryFrom);
+    if(!gears.length) return "";
+    const label = c.annexe ? c.titre : (c.numero != null ? `Chapitre ${c.numero} — ${c.titre}` : c.titre);
+    const opts = gears.map(q => `<option value="${q.id}" ${q.id===selectedId?"selected":""}>${escapeHtml(q.titre)}</option>`).join("");
+    return `<optgroup label="${escapeHtml(label)}">${opts}</optgroup>`;
+  }).join("");
+}
+function openGearPicker(){
+  const ch = chapter(chapId);
+  const opts = gearOptionsHtml(ch.id);
+  if(!opts){ toast("Aucun engrenage disponible dans un autre chapitre pour l'instant"); return; }
+  openId = null;
+  sheetBody.innerHTML = `
+    <h3>🔗 Reprendre un engrenage</h3>
+    <p class="desc">Choisis un point clé (engrenage) déjà présent dans un autre chapitre. Une copie sera ajoutée à ce chapitre : elle se validera automatiquement dès que l'originale le sera — impossible à valider à la main, comme les autres reprises automatiques.</p>
+    <label class="f">Engrenage à reprendre</label>
+    <select class="f" id="gpSource">${opts}</select>
+    <label class="f">Titre affiché ici</label>
+    <input class="f" id="gpTitre" value="">
+    <div class="sheetActions" style="margin-top:14px">
+      <button class="btn primary" id="gpCreate">Créer</button>
+      <button class="btn ghost" id="gpCancel">Annuler</button>
+    </div>`;
+  sheet.classList.add("open");
+
+  const srcSel = $("#gpSource"), titreI = $("#gpTitre");
+  const syncTitre = () => { const src = ALL[srcSel.value]; if(src) titreI.value = src.titre; };
+  syncTitre();
+  srcSel.onchange = syncTitre;
+  $("#gpCancel").onclick = closeSheet;
+  $("#gpCreate").onclick = () => {
+    const srcId = srcSel.value, src = ALL[srcId]; if(!src) return;
+    snapshot();
+    const id = ch.id + "_" + Date.now().toString(36);
+    const c = bounds();
+    const srcCh = chapter(src._ch);
+    const srcLabel = srcCh ? (srcCh.numero != null ? "Chapitre " + srcCh.numero : srcCh.titre) : "un chapitre précédent";
+    ch.quetes.push({
+      id, type:"gear", size: 1.4, icon: src.icon || "⭐",
+      titre: (titreI.value.trim() || src.titre),
+      x: Math.round(c.x + c.w/2), y: Math.round(c.y + c.h + 120),
+      deps: [], carryFrom: srcId,
+      desc: "Reprise automatique du " + srcLabel + " : « " + src.titre + " » déjà acquis.",
+      criteres: [], video: ""
+    });
+    persistProgramme(); render(); closeSheet();
+    toast("Engrenage repris — place-le où tu veux avec « Déplacer »");
+  };
+}
+$("#btnAddGear").onclick = openGearPicker;
 
 function adminForm(q){
   const ch = chapter(chapId);
