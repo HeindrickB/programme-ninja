@@ -30,7 +30,7 @@ const PROGRAMME = {
        ========================================================== */
     {
       id: "ch_mtv49t3o",
-      numero: 1,
+      numero: 0,
       titre: "Informations importantes",
       sousTitre: "",
       requis: [],
@@ -42,7 +42,7 @@ const PROGRAMME = {
        ========================================================== */
     {
       id: "ch1",
-      numero: 2,
+      numero: 1,
       titre: "Les bases",
       sousTitre: "Du grip zéro au lâché regrab barre à barre",
       requis: [],                 // toujours accessible
@@ -51,7 +51,7 @@ const PROGRAMME = {
         /* ---- Bloc grip / force ---- */
         {
           id: "c1_dead_hang",
-          type: "square", size: 1, icon: "⏱",
+          type: "square", size: 0.9, icon: "⏱",
           titre: "20 secondes de dead hang",
           x: 205, y: 121,
           deps: [],
@@ -61,7 +61,7 @@ const PROGRAMME = {
         },
         {
           id: "c1_changement_prise",
-          type: "square", size: 1, icon: "🔄",
+          type: "square", size: 0.9, icon: "🔄",
           titre: "Changement de prise",
           x: 462, y: 120,
           deps: [],
@@ -249,7 +249,7 @@ const PROGRAMME = {
        ========================================================== */
     {
       id: "ch2",
-      numero: 3,
+      numero: 2,
       titre: "Ça commence à devenir sérieux",
       sousTitre: "Prises variées, gibbon, sangles et première compétition",
       requis: ["c1_lache_regrab"],
@@ -287,9 +287,15 @@ const PROGRAMME = {
         { id:"c2_demi_sphere",   type:"square", size:1, icon:"◗", titre:"Demi-sphère",      x: 1041, y: 305, deps: ["c2_grip_force"], desc:"Suspension sur demi-sphères.", criteres:["À définir"], video:"" },
         { id:"c2_barre_pivot",   type:"square", size:1, icon:"⟳", titre:"Barre pivotante",  x: 1042, y: 459, deps: ["c2_grip_force"], desc:"Suspension sur barre qui tourne librement.", criteres:["À définir"], video:"" },
         { id:"c2_boules",        type:"square", size:1, icon:"⚫", titre:"Boules",           x: 1045, y: 611, deps: ["c2_grip_force"], desc:"Suspension sur boules suspendues.", criteres:["À définir"], video:"" },
-        { id:"c2_nunchaku",      type:"square", size:1, icon:"⌇", titre:"Nunchaku",         x: 1043, y: 751, deps: ["c2_grip_force"], desc:"Suspension sur nunchakus.", criteres:["À définir"], video:"" },
+        { id:"c2_nunchaku",      type:"square", size:1, icon:"⌇", titre:"Nunchaku",         x: 1046, y: 753, deps: ["c2_grip_force"], desc:"Suspension sur nunchakus.", criteres:["À définir"], video:"" },
         { id:"ch2_mtvdysge",     type:"square", size:1, icon:"⭐", titre:"Lock off 2 bras",  x: 1044, y: 9,   deps: ["c2_grip_force"], desc:"", criteres:[], video:"" },
         { id:"ch2_mtvdzlog",     type:"square", size:1, icon:"⭐", titre:"Lock off 1 bras",  x: 1329, y: 11,  deps: ["ch2_mtvdysge"], desc:"", criteres:[], video:"" },
+
+        /* --- Branche précision (depuis la reprise du Chapitre 1) --- */
+        { id:"ch2_mtwlqzbh",    type:"circle", size:0.6, icon:"⭐", titre:"9 pas",  x: 261, y: 195, deps: ["c1_lache_regrab_ch2"], desc:"", criteres:[], video:"" },
+        { id:"ch2_mtwlrplm",    type:"circle", size:0.6, icon:"⭐", titre:"10 pas", x: 348, y: 121, deps: ["ch2_mtwlqzbh"], desc:"", criteres:[], video:"" },
+        { id:"ch2_mtwlrqfj",    type:"circle", size:0.6, icon:"⭐", titre:"11 pas", x: 454, y: 122, deps: ["ch2_mtwlrplm"], desc:"", criteres:[], video:"" },
+        { id:"ch2_mtwlrr4x",    type:"circle", size:0.6, icon:"⭐", titre:"12 pas", x: 532, y: 197, deps: ["ch2_mtwlrqfj"], desc:"", criteres:[], video:"" },
 
         /* --- Lâché regrab sur chaque support --- */
         { id:"c2_lr_reglette",   type:"square", size:1, icon:"➡", titre:"Lâché regrab réglette",       x: 1328, y: 161, deps: ["c2_reglettes"],   desc:"Lâcher et attraper une réglette.", criteres:["À définir"], video:"" },
@@ -349,30 +355,72 @@ const PROGRAMME = {
     },
 
     /* ==========================================================
-       CHAPITRE 4 — LE TECHNICIEN
+       CHAPITRE 3 — LE TECHNICIEN
        ========================================================== */
     {
       id: "ch_mtvv70mg",
-      numero: 4,
-      titre: "Chapitre 4 : Le technicien",
+      numero: 3,
+      titre: "Le technicien",
       sousTitre: "",
-      requis: [],
+      requis: ["c2_fondamentaux"],
       quetes: [
         /* Point clé repris automatiquement du Chapitre 2 — se valide tout
            seul dès que "c2_fondamentaux" est validé. */
         {
           id: "ch_mtvv70mg_mtvvbghn",
-          type: "gear", size: 1.5, icon: "⭐",
+          type: "gear", size: 1.6, icon: "⭐",
           titre: "Fondamentaux acquis",
-          x: 651, y: 658,
+          x: 651, y: 688,
           deps: [],
           carryFrom: "c2_fondamentaux",
           desc: "",
           criteres: [],
           video: ""
         },
-        { id:"ch_mtvv70mg_mtvve8e4", type:"square", size:1.3, icon:"⭐", titre:"Tech objets", x: 373, y: 365, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres:[], video:"" },
-        { id:"ch_mtvv70mg_mtvvg8rd", type:"square", size:1,   icon:"⭐", titre:"Anneaux",     x: 102, y: 595, deps: [], desc:"", criteres:[], video:"" }
+        { id:"ch_mtvv70mg_mtvve8e4", type:"square", size:1.45, icon:"⭐", titre:"Tech objets", x: 169, y: 163, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtvwbgpe", "ch_mtvv70mg_mtvwbsmq", "ch_mtvv70mg_mtvwbtae", "ch_mtvv70mg_mtvwbtxn", "ch_mtvv70mg_mtvwbubs"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvvg8rd", type:"square", size:1, icon:"⭐", titre:"Anneaux", x: 1312, y: 1, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbgpe", type:"square", size:1.2, icon:"⭐", titre:"Rodeo Rope", x: 0, y: -199, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbsmq", type:"square", size:1.2, icon:"⭐", titre:"Anneaux", x: 168, y: 621, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbtae", type:"square", size:1.2, icon:"⭐", titre:"Flying bar", x: -339, y: 162, deps: ["ch_mtvv70mg_mtvx99au", "ch_mtvv70mg_mtvxfssg"], liens: ["ch_mtvv70mg_mtvx96u3", "ch_mtvv70mg_mtvxnj1g", "ch_mtvv70mg_mtvxnjyu", "ch_mtvv70mg_mtvxr2fo", "ch_mtvv70mg_mtvxvcko"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbtxn", type:"square", size:1.2, icon:"⭐", titre:"Metal Cane / Talon", x: -342, y: 538, deps: ["ch_mtvv70mg_mtvyccog"], liens: ["ch_mtvv70mg_mtvyc5jw"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbubs", type:"square", size:1.2, icon:"⭐", titre:"Batarang", x: -346, y: 1026, deps: ["ch_mtvv70mg_mtwl1t9r"], liens: ["ch_mtvv70mg_mtwl14ur"], desc:"", criteres: [], video:"" },
+        {
+          id: "ch_mtvv70mg_mtvwey04",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Technicien professionnel",
+          x: 658, y: -767,
+          deps: ["ch_mtvv70mg_mtvve8e4", "ch_mtvv70mg_mtvwg8z8", "ch_mtvv70mg_mtvwgbct", "ch_mtvv70mg_mtvx06c5"],
+          desc: "",
+          criteres: [],
+          video: ""
+        },
+        { id:"ch_mtvv70mg_mtvwg8z8", type:"square", size:1.3, icon:"⭐", titre:"Links", x: 650, y: 73, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwgbct", type:"square", size:1.3, icon:"⭐", titre:"Lâché + Tech", x: 1098, y: 288, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx06c5", type:"square", size:1.3, icon:"⭐", titre:"Tech Spécifique", x: 924, y: 689, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx96u3", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar Elastique", x: -576, y: -34, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx99au", type:"square", size:0.9, icon:"⭐", titre:"Flying bar classique", x: -815, y: 159, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx99l8", type:"square", size:0.8, icon:"⭐", titre:"Salmon ladder Up", x: -577, y: -205, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxfssg", type:"square", size:0.8, icon:"⭐", titre:"Salmon ladder Down", x: -340, y: -70, deps: ["ch_mtvv70mg_mtvx99l8"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxnj1g", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar précision", x: -575, y: 87, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxnjyu", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar 180° avec la barre", x: -574, y: 208, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxr2fo", type:"circle", size:0.8, icon:"⭐", titre:"Reverse catch", x: -574, y: 347, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxvcko", type:"circle", size:0.8, icon:"⭐", titre:"Superman Lâché", x: -341, y: 347, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvy0zg5", type:"circle", size:0.7, icon:"⭐", titre:"2 crans", x: -705, y: -308, deps: ["ch_mtvv70mg_mtvx99l8"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvy28zl", type:"circle", size:0.7, icon:"⭐", titre:"3 crans", x: -579, y: -373, deps: ["ch_mtvv70mg_mtvy0zg5"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvy29ku", type:"circle", size:0.7, icon:"⭐", titre:"4 crans", x: -457, y: -309, deps: ["ch_mtvv70mg_mtvy28zl"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvyc5jw", type:"circle", size:0.8, icon:"⭐", titre:"Demi-tour", x: -343, y: 726, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvyccog", type:"square", size:0.8, icon:"⭐", titre:"Lâché précision", x: -498, y: 538, deps: ["ch_mtvv70mg_mtvygfj8"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvygfj8", type:"square", size:0.8, icon:"⭐", titre:"Lâché vers l'avant sortie de face", x: -656, y: 537, deps: ["ch_mtvv70mg_mtvygj6p"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvygj6p", type:"square", size:0.8, icon:"⭐", titre:"Lâché vers l'avant sortie de côté", x: -812, y: 536, deps: ["ch_mtvv70mg_mtvygkpr"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvygkpr", type:"square", size:0.8, icon:"⭐", titre:"Lâché 180°", x: -813, y: 724, deps: ["ch_mtvv70mg_mtvygl9f"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvygl9f", type:"square", size:0.8, icon:"⭐", titre:"Lâché 90°", x: -657, y: 724, deps: ["ch_mtvv70mg_mtvyglry"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvyglry", type:"square", size:0.8, icon:"⭐", titre:"Glisser", x: -497, y: 724, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl14ur", type:"circle", size:0.8, icon:"⭐", titre:"Demi-tour", x: -344, y: 865, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl1jxd", type:"square", size:0.8, icon:"⭐", titre:"Saut sur barre", x: -498, y: 863, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl1n38", type:"square", size:0.8, icon:"⭐", titre:"Lâché avant atterrissage avant", x: -803, y: 939, deps: ["ch_mtvv70mg_mtwl1qp1"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl1ph9", type:"square", size:0.8, icon:"⭐", titre:"Lâché avant atterrissage côté", x: -660, y: 1024, deps: ["ch_mtvv70mg_mtwl1n38"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl1qp1", type:"square", size:0.8, icon:"⭐", titre:"Batarang classique", x: -658, y: 861, deps: ["ch_mtvv70mg_mtwl1jxd"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwl1t9r", type:"square", size:0.8, icon:"⭐", titre:"Lâché côté atterrissage côté", x: -498, y: 1023, deps: ["ch_mtvv70mg_mtwl1ph9"], desc:"", criteres: [], video:"" }
       ]
     }
   ]
