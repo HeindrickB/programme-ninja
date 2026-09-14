@@ -34,7 +34,59 @@ const PROGRAMME = {
       titre: "Informations importantes",
       sousTitre: "",
       requis: [],
-      quetes: []
+      quetes: [
+        {
+          id: "ch_mtv49t3o_mtzgvd9t",
+          type: "square", size: 1.5, icon: "⭐",
+          titre: "Bienvenue",
+          x: 50, y: 220,
+          deps: [],
+          desc: "Ici commence un arbre de progression complet, pensé pour t'emmener d'un niveau débutant total jusqu'aux meilleurs niveaux français en ninja. Le but de cette appli est simple : faire découvrir cette discipline au plus grand nombre, et montrer tout ce qu'il est possible d'apprendre en suivant le bon chemin.\n\nIl n'y a pas d'ordre imposé pour valider les quêtes — mais une trame générale se dessine, et une vraie progression se construit chapitre après chapitre.\n\nQuand tu maîtrises ce qui est décrit dans une quête, appuie sur « valider » pour débloquer ce qui suit. Essaie tout de suite : valide cette quête pour voir la suite apparaître.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtv49t3o_mtzhl1wh",
+          type: "square", size: 1.5, icon: "⭐",
+          titre: "Fonctionnement de l'application",
+          x: 376, y: 219,
+          deps: ["ch_mtv49t3o_mtzgvd9t"],
+          desc: "Trois formes t'accompagnent dans l'arbre. Le rond : souvent un bonus, jamais obligatoire pour avancer. Le carré : une étape à valider pour progresser. L'engrenage : un point clé, une compétence charnière vraiment importante à maîtriser. Plus une icône est grande, plus elle est importante à apprendre.\n\nEntre deux quêtes, une flèche en pointillé ne bloque rien : c'est une piste bonus. Une flèche pleine verrouille la suite tant que l'étape précédente n'est pas validée.\n\nTu peux zoomer, dézoomer et te déplacer librement dans l'arbre. Pour voir en un coup d'œil ce qu'il te reste à faire sur une progression, reste appuyé sur une icône : le chemin restant s'illumine en rouge.\n\nEn haut à gauche, la liste des chapitres — navigue où tu veux si tu es curieux. En haut à droite, un bouton te donne une vue d'ensemble du chapitre en cours.\n\nLes cases grises claires sont déjà accessibles et peuvent être validées. Les cases grises foncées sont encore verrouillées par une étape précédente.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtv49t3o_mtzhq5xm",
+          type: "circle", size: 1.5, icon: "⭐",
+          titre: "Gratuit et sans pub",
+          x: 710, y: 219,
+          deps: ["ch_mtv49t3o_mtzhl1wh"],
+          desc: "Programme Ninja est gratuite, sans aucune publicité, et le restera. J'y ai passé énormément de temps en dehors de mes heures de travail, simplement pour faire plaisir à la communauté ninja et rendre cette discipline plus accessible à tous.\n\nSi l'appli t'aide et que tu as envie de me remercier pour ce travail, un petit geste est toujours possible — jamais demandé, jamais obligatoire.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtv49t3o_mtzhr1nc",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Bon entraînement",
+          x: 1064, y: 219,
+          deps: ["ch_mtv49t3o_mtzhq5xm"],
+          desc: "Bravo, tu viens de terminer ce premier chapitre ! Le vrai programme commence maintenant : bon entraînement, et bonne chance dans ta quête, ninja 🥷",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtv49t3o_mtzhsgpv",
+          type: "circle", size: 1.5, icon: "•",
+          titre: "Follow",
+          x: 889, y: -19,
+          deps: [],
+          liens: ["ch_mtv49t3o_mtzhq5xm"],
+          desc: "Envie de voir plus de ninja ? Retrouve-moi sur YouTube et Instagram : entraînements, astuces et coulisses. Un abonnement ne coûte rien et ça aide énormément à faire grandir tout ça 🙏",
+          criteres: [],
+          video: ""
+        }
+      ]
     },
 
     /* ==========================================================
@@ -364,8 +416,6 @@ const PROGRAMME = {
       sousTitre: "",
       requis: ["c2_fondamentaux"],
       quetes: [
-        /* Point clé repris automatiquement du Chapitre 2 — se valide tout
-           seul dès que "c2_fondamentaux" est validé. */
         {
           id: "ch_mtvv70mg_mtvvbghn",
           type: "gear", size: 1.6, icon: "⭐",
@@ -378,9 +428,8 @@ const PROGRAMME = {
           video: ""
         },
         { id:"ch_mtvv70mg_mtvve8e4", type:"square", size:1.45, icon:"⭐", titre:"Tech objets", x: 169, y: 163, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtvwbgpe", "ch_mtvv70mg_mtvwbsmq", "ch_mtvv70mg_mtvwbtae", "ch_mtvv70mg_mtvwbtxn", "ch_mtvv70mg_mtvwbubs"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvvg8rd", type:"square", size:1, icon:"⭐", titre:"Anneaux", x: 1312, y: 1, deps: [], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvwbgpe", type:"square", size:1.2, icon:"⭐", titre:"Rodeo Rope", x: 0, y: -199, deps: [], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvwbsmq", type:"square", size:1.2, icon:"⭐", titre:"Anneaux", x: 168, y: 621, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbgpe", type:"square", size:1.2, icon:"⭐", titre:"Rodeo Rope", x: 0, y: -199, deps: ["ch_mtvv70mg_mtwnwq81", "ch_mtvv70mg_mtwnwv9w"], liens: ["ch_mtvv70mg_mtwnuyrh"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbsmq", type:"square", size:1.2, icon:"⭐", titre:"Anneaux", x: 168, y: 621, deps: ["ch_mtvv70mg_mtwnajg4", "ch_mtvv70mg_mtwn9vir", "ch_mtvv70mg_mtwnb3hl"], liens: ["ch_mtvv70mg_mtwnb6ot"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbtae", type:"square", size:1.2, icon:"⭐", titre:"Flying bar", x: -339, y: 162, deps: ["ch_mtvv70mg_mtvx99au", "ch_mtvv70mg_mtvxfssg"], liens: ["ch_mtvv70mg_mtvx96u3", "ch_mtvv70mg_mtvxnj1g", "ch_mtvv70mg_mtvxnjyu", "ch_mtvv70mg_mtvxr2fo", "ch_mtvv70mg_mtvxvcko"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbtxn", type:"square", size:1.2, icon:"⭐", titre:"Metal Cane / Talon", x: -342, y: 538, deps: ["ch_mtvv70mg_mtvyccog"], liens: ["ch_mtvv70mg_mtvyc5jw"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbubs", type:"square", size:1.2, icon:"⭐", titre:"Batarang", x: -346, y: 1026, deps: ["ch_mtvv70mg_mtwl1t9r"], liens: ["ch_mtvv70mg_mtwl14ur"], desc:"", criteres: [], video:"" },
@@ -388,15 +437,15 @@ const PROGRAMME = {
           id: "ch_mtvv70mg_mtvwey04",
           type: "gear", size: 1.6, icon: "⭐",
           titre: "Technicien professionnel",
-          x: 658, y: -767,
-          deps: ["ch_mtvv70mg_mtvve8e4", "ch_mtvv70mg_mtvwg8z8", "ch_mtvv70mg_mtvwgbct", "ch_mtvv70mg_mtvx06c5"],
+          x: 661, y: -768,
+          deps: ["ch_mtvv70mg_mtvve8e4", "ch_mtvv70mg_mtvwgbct", "ch_mtvv70mg_mtvx06c5", "ch_mtvv70mg_mtzg0m6a"],
           desc: "",
           criteres: [],
           video: ""
         },
-        { id:"ch_mtvv70mg_mtvwg8z8", type:"square", size:1.3, icon:"⭐", titre:"Links", x: 650, y: 73, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvwgbct", type:"square", size:1.3, icon:"⭐", titre:"Lâché + Tech", x: 1098, y: 288, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvx06c5", type:"square", size:1.3, icon:"⭐", titre:"Tech Spécifique", x: 924, y: 689, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwg8z8", type:"square", size:1.45, icon:"⭐", titre:"Links Classiques à vague", x: 655, y: 73, deps: ["ch_mtvv70mg_mtzfvvfz"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwgbct", type:"square", size:1.45, icon:"⭐", titre:"Lâché + Tech", x: 1162, y: 163, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtzgmr92", "ch_mtvv70mg_mtzgmsjp", "ch_mtvv70mg_mtzgmvsj", "ch_mtvv70mg_mtzgmwsb"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx06c5", type:"square", size:1.3, icon:"⭐", titre:"Tech Spécifique", x: 1126, y: 782, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtwo5pdp", "ch_mtvv70mg_mtwo5l5l", "ch_mtvv70mg_mtwo58rr", "ch_mtvv70mg_mu0ztros"], liens: ["ch_mtvv70mg_mtwoa6q3"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx96u3", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar Elastique", x: -576, y: -34, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx99au", type:"square", size:0.9, icon:"⭐", titre:"Flying bar classique", x: -815, y: 159, deps: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx99l8", type:"square", size:0.8, icon:"⭐", titre:"Salmon ladder Up", x: -577, y: -205, deps: [], desc:"", criteres: [], video:"" },
@@ -420,7 +469,107 @@ const PROGRAMME = {
         { id:"ch_mtvv70mg_mtwl1n38", type:"square", size:0.8, icon:"⭐", titre:"Lâché avant atterrissage avant", x: -803, y: 939, deps: ["ch_mtvv70mg_mtwl1qp1"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtwl1ph9", type:"square", size:0.8, icon:"⭐", titre:"Lâché avant atterrissage côté", x: -660, y: 1024, deps: ["ch_mtvv70mg_mtwl1n38"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtwl1qp1", type:"square", size:0.8, icon:"⭐", titre:"Batarang classique", x: -658, y: 861, deps: ["ch_mtvv70mg_mtwl1jxd"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtwl1t9r", type:"square", size:0.8, icon:"⭐", titre:"Lâché côté atterrissage côté", x: -498, y: 1023, deps: ["ch_mtvv70mg_mtwl1ph9"], desc:"", criteres: [], video:"" }
+        { id:"ch_mtvv70mg_mtwl1t9r", type:"square", size:0.8, icon:"⭐", titre:"Lâché côté atterrissage côté", x: -498, y: 1023, deps: ["ch_mtvv70mg_mtwl1ph9"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwn9vir", type:"square", size:0.8, icon:"⭐", titre:"Transfert devant à derrière", x: -68, y: 744, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnajg4", type:"square", size:0.8, icon:"⭐", titre:"Reverse skyhook", x: 72, y: 819, deps: ["ch_mtvv70mg_mtwnajug"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnajug", type:"square", size:0.8, icon:"⭐", titre:"Skyhook classique", x: -14, y: 980, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnb3hl", type:"square", size:0.8, icon:"⭐", titre:"Sortie un anneaux de côté", x: 260, y: 819, deps: ["ch_mtvv70mg_mtwnb3w5"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnb3w5", type:"square", size:0.8, icon:"⭐", titre:"Sortie doubles anneaux de côtés", x: 327, y: 979, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnb6ot", type:"circle", size:0.8, icon:"⭐", titre:"Sortie reverse à avant", x: 392, y: 743, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnuyrh", type:"circle", size:0.8, icon:"⭐", titre:"Transfert devant à derrière", x: 178, y: -310, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnvaf3", type:"square", size:0.8, icon:"⭐", titre:"Skyhook classique", x: -291, y: -426, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnwq81", type:"square", size:0.8, icon:"⭐", titre:"Reverse skyhook", x: -155, y: -313, deps: ["ch_mtvv70mg_mtwnvaf3"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnwus2", type:"square", size:0.8, icon:"⭐", titre:"Saut + catch", x: 1, y: -542, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwnwv9w", type:"square", size:0.8, icon:"⭐", titre:"Lâché barre à barré", x: 1, y: -388, deps: ["ch_mtvv70mg_mtwnwus2"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo58rr", type:"square", size:0.8, icon:"⭐", titre:"Throwback", x: 1367, y: 630, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo5l5l", type:"square", size:0.8, icon:"⭐", titre:"Coffin lâché", x: 1441, y: 831, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo5pdp", type:"square", size:0.8, icon:"⭐", titre:"Spinning Disc", x: 1269, y: 952, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo6j1n", type:"circle", size:0.7, icon:"⭐", titre:"Avec Objets", x: 1498, y: 475, deps: ["ch_mtvv70mg_mtwo58rr"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo7fn9", type:"circle", size:0.7, icon:"⭐", titre:"Freestyle", x: 1568, y: 587, deps: ["ch_mtvv70mg_mtwo58rr"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo7gaq", type:"circle", size:0.7, icon:"⭐", titre:"Avec objets", x: 1620, y: 781, deps: ["ch_mtvv70mg_mtwo5l5l"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwo7gfu", type:"circle", size:0.7, icon:"⭐", titre:"180° demi-tour", x: 1618, y: 906, deps: ["ch_mtvv70mg_mtwo5l5l"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtwoa6q3", type:"circle", size:0.7, icon:"⭐", titre:"Freestyle", x: 963, y: 956, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzfsqke", type:"square", size:0.9, icon:"⭐", titre:"Plat ventre", x: 652, y: 437, deps: ["ch_mtvv70mg_mtvvbghn"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzfvvfz", type:"square", size:0.9, icon:"⭐", titre:"Bras tendus", x: 652, y: 275, deps: ["ch_mtvv70mg_mtzfsqke"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzg0m6a", type:"square", size:1.45, icon:"⭐", titre:"Links Spécifiques", x: 655, y: -156, deps: ["ch_mtvv70mg_mtvwg8z8", "ch_mtvv70mg_mtzg1gn6", "ch_mtvv70mg_mtzg1h52"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzg1gn6", type:"square", size:1.05, icon:"⭐", titre:"Underbar", x: 476, y: -159, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzg1h52", type:"square", size:1.05, icon:"⭐", titre:"Speed link", x: 834, y: -154, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzg3i2p", type:"square", size:0.8, icon:"⭐", titre:"Changements directions en link", x: 826, y: 75, deps: ["ch_mtvv70mg_mtvwg8z8"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzgmr92", type:"square", size:0.8, icon:"⭐", titre:"Soulever/enlever un objet", x: 1281, y: -110, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzgmsjp", type:"square", size:0.8, icon:"⭐", titre:"Up for grab", x: 1445, y: 42, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzgmvsj", type:"square", size:0.8, icon:"⭐", titre:"Pousser avec les pieds ou les mains", x: 1444, y: 258, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtzgmwsb", type:"square", size:0.8, icon:"⭐", titre:"Changements de mains", x: 1279, y: 425, deps: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mu0ztros", type:"square", size:0.8, icon:"⭐", titre:"Tiktok", x: 1126, y: 1012, deps: [], desc:"", criteres: [], video:"" }
+
+      ]
+    },
+
+    /* ==========================================================
+       CHAPITRE 4 — FIN ?
+       ========================================================== */
+    {
+      id: "ch_mtzhwcf0",
+      numero: 4,
+      annexe: false,
+      titre: "Fin ? ",
+      sousTitre: "Tous les points clés de ton parcours, réunis au même endroit.",
+      requis: [],
+      quetes: [
+        {
+          id: "ch_mtzhwcf0_mtzhwkwh",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Bon entraînement",
+          x: 50, y: 220,
+          deps: [],
+          carryFrom: "ch_mtv49t3o_mtzhr1nc",
+          desc: "Reprise automatique de l'introduction : le tout premier point clé validé sur ce programme.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtzhwcf0_mtzhx408",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Balancier sur barre fixe",
+          x: 308, y: 218,
+          deps: [],
+          carryFrom: "c1_balancier",
+          desc: "Reprise automatique du Chapitre 1 : le moteur de tout le ninja.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtzhwcf0_mtzhx58w",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Lâché regrab barre à barre",
+          x: 580, y: 218,
+          deps: [],
+          carryFrom: "c1_lache_regrab",
+          desc: "Reprise automatique du Chapitre 1 : le geste signature qui ouvre le Chapitre 2.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtzhwcf0_mtzhx70f",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Fondamentaux acquis",
+          x: 841, y: 218,
+          deps: [],
+          carryFrom: "c2_fondamentaux",
+          desc: "Reprise automatique du Chapitre 2 : tous les supports et tous les lâchés maîtrisés.",
+          criteres: [],
+          video: ""
+        },
+        {
+          id: "ch_mtzhwcf0_mtzhx81c",
+          type: "gear", size: 1.6, icon: "⭐",
+          titre: "Technicien professionnel",
+          x: 1111, y: 220,
+          deps: [],
+          carryFrom: "ch_mtvv70mg_mtvwey04",
+          desc: "Reprise automatique du Chapitre 3 : la maîtrise technique complète.",
+          criteres: [],
+          video: ""
+        }
       ]
     }
   ]
