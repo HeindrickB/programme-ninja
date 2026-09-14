@@ -57,7 +57,7 @@ const PROGRAMME = {
         },
         {
           id: "ch_mtv49t3o_mtzhq5xm",
-          type: "circle", size: 1.5, icon: "⭐",
+          type: "square", size: 1.5, icon: "⭐",
           titre: "Gratuit et sans pub",
           x: 710, y: 219,
           deps: ["ch_mtv49t3o_mtzhl1wh"],
