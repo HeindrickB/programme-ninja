@@ -127,7 +127,7 @@ svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .qtype.circle{background:#4a3f2a;color:#ffd9a0}
 .qtype.gear{background:#4b2f52;color:#f0c2ff}
 #sheetBody h3{margin:0 0 6px;font-size:21px;line-height:1.22}
-#sheetBody .desc{color:#c8d2cd;font-size:14.5px;line-height:1.55;margin:0 0 14px}
+#sheetBody .desc{color:#c8d2cd;font-size:14.5px;line-height:1.55;margin:0 0 14px;white-space:pre-line}
 .crit{list-style:none;padding:0;margin:0 0 16px}
 .crit li{position:relative;padding:8px 10px 8px 34px;background:#ffffff08;border-radius:10px;
   margin-bottom:6px;font-size:13.5px;line-height:1.4}
@@ -959,7 +959,8 @@ function videoHtml(url){
   if(yt) return `<div class="vidbox"><iframe src="https://www.youtube.com/embed/${yt[1]}?rel=0&playsinline=1" allowfullscreen allow="encrypted-media;picture-in-picture"></iframe></div>`;
   const vm = url.match(/vimeo\.com\/(\d+)/);
   if(vm) return `<div class="vidbox"><iframe src="https://player.vimeo.com/video/${vm[1]}" allowfullscreen></iframe></div>`;
-  return `<div class="vidbox"><video src="${url}" controls playsinline preload="metadata"></video></div>`;
+  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<div class="vidbox"><video src="${url}" controls playsinline preload="metadata"></video></div>`;
+  return `<div class="vidbox"><a class="btn primary" href="${escapeHtml(url)}" target="_blank" rel="noopener">🔗 Ouvrir le lien</a></div>`;
 }
 
 function openQuest(id){
