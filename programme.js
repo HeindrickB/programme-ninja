@@ -42,7 +42,7 @@ const PROGRAMME = {
           titre: "Bienvenue",
           x: 50, y: 220,
           deps: [],
-          desc: "Ici commence un arbre de progression complet, pensé pour t'emmener d'un niveau débutant total jusqu'aux meilleurs niveaux français en ninja. Le but de cette appli est simple : faire découvrir cette discipline au plus grand nombre, et montrer tout ce qu'il est possible d'apprendre en suivant le bon chemin.\n\nIl n'y a pas d'ordre imposé pour valider les quêtes — mais une trame générale se dessine, et une vraie progression se construit chapitre après chapitre.\n\nQuand tu maîtrises ce qui est décrit dans une quête, appuie sur « valider » pour débloquer ce qui suit. Essaie tout de suite : valide cette quête pour voir la suite apparaître.",
+          desc: "Bienvenue sur la première application dédiée au ninja !\n\nQue tu connaisses le ninja depuis longtemps ou que tu viennes de le découvrir, l'application t'aidera sûrement à atteindre tes objectifs sportifs dans le parcours d'obstacles. Elle est plus spécialisée pour le milieu du Ninja plutôt que l'OCR et/ou les Spartans. Mais t'améliorer là-dessus t'aidera à progresser aussi dans ces disciplines. \n\nPour cela, tu verras dans cette application un arbre de progression avec des quêtes de plus en plus techniques et difficiles au fur et à mesure que tu progresses. Aucun ordre n'est imposé pour valider les quêtes, mais une trame générale se dessine et une vraie progression se construit chapitre après chapitre.\n\nL'objectif final : atteindre l'engrenage « FIN » du chapitre 4. Lorsque tu l'auras débloqué, tu auras atteint le niveau des meilleurs ninjas en France. \n\nQuand tu maîtrises ce qui est décrit dans une quête, appuie sur « Valider » pour débloquer la suite. Prends le temps de bien ancrer chaque mouvement avant de valider — sinon tu risques de te retrouver coincé face à des niveaux bien plus exigeants.\n\nEssaie tout de suite : valide cette quête pour voir la suite apparaître !",
           criteres: [],
           video: ""
         },
@@ -53,7 +53,7 @@ const PROGRAMME = {
           titre: "Fonctionnement de l'application",
           x: 376, y: 219,
           deps: ["ch_mtv49t3o_mtzgvd9t"],
-          desc: "Trois formes t'accompagnent dans l'arbre. Le rond : souvent un bonus, jamais obligatoire pour avancer. Le carré : une étape à valider pour progresser. L'engrenage : un point clé, une compétence charnière vraiment importante à maîtriser. Plus une icône est grande, plus elle est importante à apprendre.\n\nEntre deux quêtes, une flèche en pointillé ne bloque rien : c'est une piste bonus. Une flèche pleine verrouille la suite tant que l'étape précédente n'est pas validée.\n\nTu peux zoomer, dézoomer et te déplacer librement dans l'arbre. Pour voir en un coup d'œil ce qu'il te reste à faire sur une progression, reste appuyé sur une icône : le chemin restant s'illumine en rouge.\n\nEn haut à gauche, la liste des chapitres — navigue où tu veux si tu es curieux. En haut à droite, un bouton te donne une vue d'ensemble du chapitre en cours.\n\nLes cases grises claires sont déjà accessibles et peuvent être validées. Les cases grises foncées sont encore verrouillées par une étape précédente.",
+          desc: "Avant que tu démarres l'arbre de progression, j'aimerais t'expliquer comment ça fonctionne plus en détail. \n\nTrois formes t'accompagnent dans l'arbre :\n\n• Le rond - Une étape bonus ; elle est optionnelle et ne bloque pas la progression dans les futures quêtes. \n• Le carré - Une étape importante à valider pour progresser dans les chapitres. Elle bloque les étapes qui mènent à l'objectif final de cette application. \n• L'engrenage - Un point clé qui détermine souvent la fin d'un chapitre et le début d'un autre. C'est une compétence obligatoire à maîtriser. \n\nAutre chose : plus une icône est grande, plus elle est importante à apprendre. \n\nEntre deux formes, une flèche montre le sens des quêtes à réaliser. Il y en a deux : \n\n• Les flèches pleines : elles verrouillent les étapes suivantes. \n• Les flèches en pointillés : Elles ne bloquent rien, mais elles montrent le sens le plus logique pour apprendre les compétences. \n\nPour l'interface, tu peux zoomer, dézoomer et te déplacer librement dans l'arbre. \nPour voir en un coup d'œil ce qu'il te reste à faire sur une progression, reste appuyé sur une icône : les quêtes et le chemin à parcourir s'illumineront en rouge.\n\nEn haut à gauche, tu as la liste des chapitres. \nEn haut à droite, un bouton te donne une vue d'ensemble du chapitre en cours.\n\nCôté couleurs : les cases gris clair sont déjà ouvertes, tu peux les valider. Les gris foncé sont encore verrouillées pour le moment. \n\nValide cette quête lorsque tu as compris.",
           criteres: [],
           video: ""
         },
@@ -64,7 +64,7 @@ const PROGRAMME = {
           titre: "Gratuit et sans pub",
           x: 710, y: 219,
           deps: ["ch_mtv49t3o_mtzhl1wh"],
-          desc: "Programme Ninja est gratuite, sans aucune publicité, et le restera. J'y ai passé énormément de temps en dehors de mes heures de travail, simplement pour faire plaisir à la communauté ninja et rendre cette discipline plus accessible à tous.\n\nSi l'appli t'aide et que tu as envie de me remercier pour ce travail, un petit geste est toujours possible — jamais demandé, jamais obligatoire.",
+          desc: "Cette application est gratuite d'accès et sans pub. Oui oui, tout est gratuit ^^ \n\nJ'y ai passé énormément de temps en dehors de mes heures de travail pour travailler la structure, les quêtes, les vidéos, les textes comme celui que tu es en train de lire actuellement. \n\nSi elle te plaît et que tu as envie de soutenir le travail fourni, tu peux cliquer sur le lien ci-dessous et déposer un don du montant de ton choix.\n(Lien d'une cagnotte pas encore mise à jour).",
           criteres: [],
           video: ""
         },
@@ -75,7 +75,7 @@ const PROGRAMME = {
           titre: "Bon entraînement",
           x: 1064, y: 219,
           deps: ["ch_mtv49t3o_mtzhq5xm"],
-          desc: "Bravo, tu viens de terminer ce premier chapitre ! Le vrai programme commence maintenant : bon entraînement, et bonne chance dans ta quête, ninja 🥷",
+          desc: "Bravo, tu viens de terminer ce premier chapitre ! Le vrai programme commence maintenant. Bon entraînement et bon courage.",
           criteres: [],
           video: ""
         },
@@ -87,7 +87,7 @@ const PROGRAMME = {
           x: 889, y: -19,
           deps: [],
           liens: ["ch_mtv49t3o_mtzhq5xm"],
-          desc: "Envie de voir plus de ninja ? Retrouve-moi sur YouTube et Instagram : entraînements, astuces et coulisses. Un abonnement ne coûte rien et ça aide énormément à faire grandir tout ça 🙏",
+          desc: "Envie de voir plus de ninja ? Retrouve-moi sur YouTube et Instagram. Du contenu sortira très prochainement...\n\nInstagram : https://www.instagram.com/heindrick_brankaer/?hl=en\n\nYoutube : https://www.youtube.com/@Heindrick_brankaer",
           criteres: [],
           video: ""
         }
