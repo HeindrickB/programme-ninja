@@ -430,7 +430,7 @@ const PROGRAMME = {
         { id:"ch_mtvv70mg_mtvve8e4", type:"square", size:1.45, icon:"⭐", titre:"Tech objets", x: 169, y: 163, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtvwbgpe", "ch_mtvv70mg_mtvwbsmq", "ch_mtvv70mg_mtvwbtae", "ch_mtvv70mg_mtvwbtxn", "ch_mtvv70mg_mtvwbubs"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbgpe", type:"square", size:1.2, icon:"⭐", titre:"Rodeo Rope", x: 0, y: -199, deps: ["ch_mtvv70mg_mtwnwq81", "ch_mtvv70mg_mtwnwv9w"], liens: ["ch_mtvv70mg_mtwnuyrh"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbsmq", type:"square", size:1.2, icon:"⭐", titre:"Anneaux", x: 168, y: 621, deps: ["ch_mtvv70mg_mtwnajg4", "ch_mtvv70mg_mtwn9vir", "ch_mtvv70mg_mtwnb3hl"], liens: ["ch_mtvv70mg_mtwnb6ot"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvwbtae", type:"square", size:1.2, icon:"⭐", titre:"Flying bar", x: -339, y: 162, deps: ["ch_mtvv70mg_mtvx99au", "ch_mtvv70mg_mtvxfssg"], liens: ["ch_mtvv70mg_mtvx96u3", "ch_mtvv70mg_mtvxnj1g", "ch_mtvv70mg_mtvxnjyu", "ch_mtvv70mg_mtvxr2fo", "ch_mtvv70mg_mtvxvcko"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvwbtae", type:"square", size:1.2, icon:"⭐", titre:"Flying bar", x: -339, y: 162, deps: ["ch_mtvv70mg_mtvx99au", "ch_mtvv70mg_mtvxfssg", "ch_mtvv70mg_mtvx96u3", "ch_mtvv70mg_mtvxnj1g", "ch_mtvv70mg_mtvxnjyu", "ch_mtvv70mg_mtvxr2fo"], liens: ["ch_mtvv70mg_mtvxvcko"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbtxn", type:"square", size:1.2, icon:"⭐", titre:"Metal Cane / Talon", x: -342, y: 538, deps: ["ch_mtvv70mg_mtvyccog"], liens: ["ch_mtvv70mg_mtvyc5jw"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwbubs", type:"square", size:1.2, icon:"⭐", titre:"Batarang", x: -346, y: 1026, deps: ["ch_mtvv70mg_mtwl1t9r"], liens: ["ch_mtvv70mg_mtwl14ur"], desc:"", criteres: [], video:"" },
         {
@@ -446,13 +446,13 @@ const PROGRAMME = {
         { id:"ch_mtvv70mg_mtvwg8z8", type:"square", size:1.45, icon:"⭐", titre:"Links Classiques à vague", x: 655, y: 73, deps: ["ch_mtvv70mg_mtzfvvfz"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvwgbct", type:"square", size:1.45, icon:"⭐", titre:"Lâché + Tech", x: 1162, y: 163, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtzgmr92", "ch_mtvv70mg_mtzgmsjp", "ch_mtvv70mg_mtzgmvsj", "ch_mtvv70mg_mtzgmwsb"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx06c5", type:"square", size:1.3, icon:"⭐", titre:"Tech Spécifique", x: 1126, y: 782, deps: ["ch_mtvv70mg_mtvvbghn", "ch_mtvv70mg_mtwo5pdp", "ch_mtvv70mg_mtwo5l5l", "ch_mtvv70mg_mtwo58rr", "ch_mtvv70mg_mu0ztros"], liens: ["ch_mtvv70mg_mtwoa6q3"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvx96u3", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar Elastique", x: -576, y: -34, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvx96u3", type:"square", size:0.8, icon:"⭐", titre:"Flying bar Elastique", x: -576, y: -34, deps: ["ch_mtvv70mg_mtvx99au"], liens: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx99au", type:"square", size:0.9, icon:"⭐", titre:"Flying bar classique", x: -815, y: 159, deps: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvx99l8", type:"square", size:0.8, icon:"⭐", titre:"Salmon ladder Up", x: -577, y: -205, deps: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvxfssg", type:"square", size:0.8, icon:"⭐", titre:"Salmon ladder Down", x: -340, y: -70, deps: ["ch_mtvv70mg_mtvx99l8"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvxnj1g", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar précision", x: -575, y: 87, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvxnjyu", type:"circle", size:0.8, icon:"⭐", titre:"Flying bar 180° avec la barre", x: -574, y: 208, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
-        { id:"ch_mtvv70mg_mtvxr2fo", type:"circle", size:0.8, icon:"⭐", titre:"Reverse catch", x: -574, y: 347, deps: ["ch_mtvv70mg_mtvx99au"], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxnj1g", type:"square", size:0.8, icon:"⭐", titre:"Flying bar précision", x: -576, y: 83, deps: ["ch_mtvv70mg_mtvx99au"], liens: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxnjyu", type:"square", size:0.8, icon:"⭐", titre:"Flying bar 180° avec la barre", x: -575, y: 217, deps: ["ch_mtvv70mg_mtvx99au"], liens: [], desc:"", criteres: [], video:"" },
+        { id:"ch_mtvv70mg_mtvxr2fo", type:"square", size:0.8, icon:"⭐", titre:"Reverse catch", x: -574, y: 347, deps: ["ch_mtvv70mg_mtvx99au"], liens: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvxvcko", type:"circle", size:0.8, icon:"⭐", titre:"Superman Lâché", x: -341, y: 347, deps: [], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvy0zg5", type:"circle", size:0.7, icon:"⭐", titre:"2 crans", x: -705, y: -308, deps: ["ch_mtvv70mg_mtvx99l8"], desc:"", criteres: [], video:"" },
         { id:"ch_mtvv70mg_mtvy28zl", type:"circle", size:0.7, icon:"⭐", titre:"3 crans", x: -579, y: -373, deps: ["ch_mtvv70mg_mtvy0zg5"], desc:"", criteres: [], video:"" },
@@ -569,6 +569,17 @@ const PROGRAMME = {
           desc: "Reprise automatique du Chapitre 3 : la maîtrise technique complète.",
           criteres: [],
           video: ""
+        },
+        {
+          id: "ch_mtzhwcf0_mu59une4",
+          type: "gear", size: 1.8, icon: "⭐",
+          titre: "FIN",
+          x: 581, y: -82,
+          deps: ["ch_mtzhwcf0_mtzhwkwh", "ch_mtzhwcf0_mtzhx408", "ch_mtzhwcf0_mtzhx58w", "ch_mtzhwcf0_mtzhx70f", "ch_mtzhwcf0_mtzhx81c"],
+          desc: "Te voilà au bout de ce programme complet, du tout premier point clé jusqu'au dernier. Peu de ninjas vont aussi loin — prends un instant pour mesurer le chemin parcouru.\n\nCe n'est pas vraiment une fin : de nouveaux chapitres viendront enrichir cette trame au fil du temps. En attendant, continue de t'entraîner, progresse à ton rythme, et surtout amuse-toi. Bravo, ninja 🥷🏆",
+          criteres: [],
+          video: "",
+          liens: []
         }
       ]
     }
