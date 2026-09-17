@@ -554,10 +554,15 @@ function render(){
     const r = radiusOf(q);
     const g = el("g",{class:"node" + (q.carryFrom ? " carry" : ""), transform:`translate(${q.x},${q.y})`, "data-id":q.id});
 
+    // forme VISUELLE du nœud : par défaut celle de q.type, mais q.iconShape
+    // permet de dessiner un contour différent (ex. un simple rond) sans
+    // toucher à q.type, qui reste la vraie sémantique (bloquant / bonus /
+    // point clé) utilisée par la logique de progression ailleurs dans le code.
+    const vt = q.iconShape || q.type;
     let shape;
-    if(q.type === "circle")      shape = el("circle",{r, class:"shape"});
-    else if(q.type === "gear")   shape = el("path",{d:gearPath(r,11), class:"shape"});
-    else                         shape = el("rect",{x:-r, y:-r, width:r*2, height:r*2,
+    if(vt === "circle")      shape = el("circle",{r, class:"shape"});
+    else if(vt === "gear")   shape = el("path",{d:gearPath(r,11), class:"shape"});
+    else                     shape = el("rect",{x:-r, y:-r, width:r*2, height:r*2,
                                                     rx:r*0.22, class:"shape"});
     shape.setAttribute("stroke-width", Math.max(3, r*0.075));
     g.appendChild(shape);
@@ -567,9 +572,9 @@ function render(){
       const clipId = "clip_" + q.id;
       const clip = el("clipPath",{id:clipId});
       const rc = r*0.86;
-      if(q.type === "circle")      clip.appendChild(el("circle",{r:rc}));
-      else if(q.type === "gear")   clip.appendChild(el("circle",{r:rc*0.92}));
-      else                         clip.appendChild(el("rect",{x:-rc,y:-rc,width:rc*2,height:rc*2,rx:rc*0.22}));
+      if(vt === "circle")      clip.appendChild(el("circle",{r:rc}));
+      else if(vt === "gear")   clip.appendChild(el("circle",{r:rc*0.92}));
+      else                     clip.appendChild(el("rect",{x:-rc,y:-rc,width:rc*2,height:rc*2,rx:rc*0.22}));
       defs.appendChild(clip);
       const img = el("image",{x:-rc, y:-rc, width:rc*2, height:rc*2,
                               "clip-path":`url(#${clipId})`, "preserveAspectRatio":"xMidYMid slice"});
@@ -577,7 +582,7 @@ function render(){
       img.setAttribute("href", q.iconImg);
       g.appendChild(img);
     } else {
-      const glyph = el("text",{class:"glyph", y: q.type==="gear" ? 1 : 0,
+      const glyph = el("text",{class:"glyph", y: vt==="gear" ? 1 : 0,
                                "font-size": (r*0.85).toFixed(0)});
       glyph.textContent = q.icon || "•";
       g.appendChild(glyph);
