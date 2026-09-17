@@ -38,8 +38,6 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzgvd9t",
           type: "square", size: 1.5, icon: "⭐",
-          iconShape: "circle",
-          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M22%2053%20L42%2073%20L79%2030%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Bienvenue",
           x: 50, y: 220,
           deps: [],
@@ -50,8 +48,6 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzhl1wh",
           type: "square", size: 1.5, icon: "⭐",
-          iconShape: "circle",
-          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M22%2053%20L42%2073%20L79%2030%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Fonctionnement de l'application",
           x: 376, y: 219,
           deps: ["ch_mtv49t3o_mtzgvd9t"],
@@ -62,8 +58,6 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzhq5xm",
           type: "square", size: 1.5, icon: "⭐",
-          iconShape: "circle",
-          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M22%2053%20L42%2073%20L79%2030%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Gratuit et sans pub",
           x: 710, y: 219,
           deps: ["ch_mtv49t3o_mtzhl1wh"],
@@ -74,8 +68,6 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzhr1nc",
           type: "gear", size: 1.6, icon: "⭐",
-          iconShape: "circle",
-          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M22%2053%20L42%2073%20L79%2030%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Bon entraînement",
           x: 1064, y: 219,
           deps: ["ch_mtv49t3o_mtzhq5xm"],
