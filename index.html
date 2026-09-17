@@ -128,6 +128,7 @@ svg.layer{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .qtype.gear{background:#4b2f52;color:#f0c2ff}
 #sheetBody h3{margin:0 0 6px;font-size:21px;line-height:1.22}
 #sheetBody .desc{color:#c8d2cd;font-size:14.5px;line-height:1.55;margin:0 0 14px;white-space:pre-line}
+#sheetBody .desc a{color:var(--accent);text-decoration:underline;word-break:break-word}
 .crit{list-style:none;padding:0;margin:0 0 16px}
 .crit li{position:relative;padding:8px 10px 8px 34px;background:#ffffff08;border-radius:10px;
   margin-bottom:6px;font-size:13.5px;line-height:1.4}
@@ -997,7 +998,7 @@ function openQuest(id){
     <h3>${escapeHtml(q.titre)}</h3>
     ${blocked}
     ${videoHtml(q.video)}
-    <p class="desc">${escapeHtml(q.desc||"")}</p>
+    <p class="desc">${linkify(escapeHtml(q.desc||""))}</p>
     ${crit ? `<label class="f">Critères de validation</label><ul class="crit">${crit}</ul>` : ""}
     <div class="sheetActions">
       ${ q.carryFrom
@@ -1021,6 +1022,15 @@ function openQuest(id){
 
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function linkify(escapedHtml){
+  return escapedHtml.replace(/(https?:\/\/[^\s<]+)/g, (match) => {
+    let url = match, trail = "";
+    const m = url.match(/[.,;:!?)\]}»"']+$/);
+    if(m){ trail = m[0]; url = url.slice(0, -trail.length); }
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trail}`;
+  });
+}
 
 function validate(id){
   const q = ALL[id]; if(!q || q.carryFrom || !isAvailable(q)) return;
