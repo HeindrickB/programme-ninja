@@ -38,6 +38,7 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzgvd9t",
           type: "square", size: 1.5, icon: "⭐",
+          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22none%22%20stroke%3D%22%23000000%22%20stroke-opacity%3D%220.18%22%20stroke-width%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22%23828c85%22%2F%3E%3Cpath%20d%3D%22M42%2050.6%20L48.8%2057.6%20L59.3%2043.6%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%224.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Bienvenue",
           x: 50, y: 220,
           deps: [],
@@ -48,6 +49,7 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzhl1wh",
           type: "square", size: 1.5, icon: "⭐",
+          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22none%22%20stroke%3D%22%23000000%22%20stroke-opacity%3D%220.18%22%20stroke-width%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22%23828c85%22%2F%3E%3Cpath%20d%3D%22M42%2050.6%20L48.8%2057.6%20L59.3%2043.6%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%224.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Fonctionnement de l'application",
           x: 376, y: 219,
           deps: ["ch_mtv49t3o_mtzgvd9t"],
@@ -58,6 +60,7 @@ const PROGRAMME = {
         {
           id: "ch_mtv49t3o_mtzhq5xm",
           type: "square", size: 1.5, icon: "⭐",
+          iconImg: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22none%22%20stroke%3D%22%23000000%22%20stroke-opacity%3D%220.18%22%20stroke-width%3D%221.3%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2229%22%20fill%3D%22%23828c85%22%2F%3E%3Cpath%20d%3D%22M42%2050.6%20L48.8%2057.6%20L59.3%2043.6%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%224.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E",
           titre: "Gratuit et sans pub",
           x: 710, y: 219,
           deps: ["ch_mtv49t3o_mtzhl1wh"],
